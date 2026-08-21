@@ -88,7 +88,7 @@ function ServiceCard({
     <div
       ref={ref}
       style={{ transitionDelay: inView ? `${index * 90}ms` : "0ms" }}
-      className={`group relative overflow-hidden bg-white px-6 py-[18px] transition-all duration-700 ease-out
+      className={`card-shadow card-shadow-hover group relative overflow-hidden rounded-[6px] bg-white px-6 py-[22px] transition-all duration-700 ease-out
         ${inView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
         hover:bg-[#faf8f3]`}
     >
@@ -154,7 +154,7 @@ export default function Services() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-px border border-[#eae6db] bg-[#eae6db] sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service, i) => (
             <ServiceCard key={service.title} service={service} index={i} />
           ))}

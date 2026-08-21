@@ -31,7 +31,7 @@ const TRUST_ITEMS = [
 
 export default function TrustBar() {
   return (
-    <div className="border-t border-white/[0.06] bg-navy-800 py-[26px]">
+    <div id="about" className="border-t border-white/[0.06] bg-navy-800 py-[26px]">
       <div className="mx-auto grid max-w-wrap grid-cols-2 items-center gap-5 px-10 lg:grid-cols-[1.3fr_repeat(4,1fr)]">
         <div className="text-[11px] font-semibold uppercase leading-relaxed tracking-[1.5px] text-gold-400">
           Trusted by Sovereign Institutions &amp; Global Partners

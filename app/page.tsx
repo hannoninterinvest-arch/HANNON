@@ -1,19 +1,17 @@
-import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import TrustBar from "@/components/TrustBar";
 import Services from "@/components/Services";
+import ProjectsSection from "@/components/ProjectsSection";
 import GlobalReach from "@/components/GlobalReach";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
     <>
-      <Navbar />
       <Hero />
       <TrustBar />
       <Services />
+      <ProjectsSection />
       <GlobalReach />
-      <Footer />
     </>
   );
 }

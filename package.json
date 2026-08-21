@@ -7,14 +7,17 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:api": "npm run start:dev --prefix backend",
     "build": "next build",
+    "build:api": "npm run build --prefix backend",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "next": "14.2.35",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "recharts": "^2.15.0"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

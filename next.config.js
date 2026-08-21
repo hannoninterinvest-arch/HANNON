@@ -5,16 +5,13 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        pathname: "/dbzweuzla/**",
       },
     ],
   },
-   eslint: {
-    // ⚠️ Ignore les erreurs ESLint pendant le build
+  eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // ⚠️ Ignore les erreurs TypeScript pendant le build
     ignoreBuildErrors: true,
   },
 };

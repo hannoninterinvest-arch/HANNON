@@ -46,3 +46,8 @@ Thumbs.db
 
 # turbopack
 .turbo
+
+# backend
+backend/node_modules
+backend/dist
+backend/.env

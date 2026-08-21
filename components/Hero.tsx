@@ -50,11 +50,11 @@ export default function Hero() {
             and global enterprises.
           </p>
           <div className="mt-[34px] flex flex-wrap gap-4">
-            <a href="#contact" className="btn btn-gold font-sans">
-              Engage With Us →
+            <a href="/projects" className="btn btn-gold font-sans">
+              Explore Projects →
             </a>
-            <a href="#services" className="btn btn-outline font-sans">
-              Explore Our Capabilities
+            <a href="/register" className="btn btn-outline font-sans">
+              Become an Investor
             </a>
           </div>
         </div>

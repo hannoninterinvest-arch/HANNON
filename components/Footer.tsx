@@ -1,9 +1,9 @@
 import Image from "next/image";
 const QUICK_LINKS = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services" },
-  { href: "#reach", label: "Global Reach" },
+  { href: "/", label: "Home" },
+  { href: "/projects", label: "Projects" },
+  { href: "/#services", label: "Services" },
+  { href: "/login", label: "Investor portal" },
 ];
 
 const SERVICE_LINKS = [
@@ -19,7 +19,7 @@ export default function Footer() {
     <footer id="contact" className="bg-navy-800 pt-[70px] text-[#c7d1e0]">
       <div className="mx-auto grid max-w-wrap grid-cols-1 gap-[30px] px-10 pb-[50px] sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.3fr_1fr]">
         <div>
-        <a href="#" className="flex items-center gap-3">
+        <a href="/" className="flex items-center gap-3">
           <div className="relative h-11 w-11 shrink-0">
             <Image
               src="https://res.cloudinary.com/dbzweuzla/image/upload/v1786402383/logoha_lpe5ct.webp"
@@ -66,7 +66,7 @@ export default function Footer() {
           <ul>
             {SERVICE_LINKS.map((label) => (
               <li key={label} className="mb-[11px]">
-                <a href="#services" className="text-[12.5px] font-light text-muted hover:text-gold-400">
+                <a href="/#services" className="text-[12.5px] font-light text-muted hover:text-gold-400">
                   {label}
                 </a>
               </li>

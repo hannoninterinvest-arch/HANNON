@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hannon
+      POSTGRES_PASSWORD: hannon
+      POSTGRES_DB: hannon
+    ports:
+      - "5432:5432"
+    volumes:
+      - hannon_pg:/var/lib/postgresql/data
+
+volumes:
+  hannon_pg:
