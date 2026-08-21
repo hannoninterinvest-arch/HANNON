@@ -87,10 +87,32 @@ ADMIN_EMAIL=admin@hannoninterinvest.com
 ADMIN_PASSWORD=HannonAdmin2026!
 ```
 
-## Déploiement
+## Déploiement (front Vercel + back Render)
 
-- **Front** : Vercel (`next build`). Définir `NEXT_PUBLIC_API_URL` vers l’API publique.
-- **API** : Render, Railway ou équivalent Node. Définir les variables Neon + Cloudinary. Le CORS autorise toutes les origines (`*`).
+Le site Next.js tourne sur **Vercel**, l’API NestJS sur **Render**. `CORS_ORIGIN=*` autorise le navigateur Vercel à appeler Render.
+
+**Render → Environment**
+
+```
+CORS_ORIGIN=*
+DATABASE_URL=postgresql://...neon.tech/neondb?sslmode=require
+JWT_SECRET=change-me-to-a-long-random-string
+JWT_EXPIRES_IN=7d
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+ADMIN_EMAIL=admin@hannoninterinvest.com
+ADMIN_PASSWORD=HannonAdmin2026!
+NPM_CONFIG_PRODUCTION=false
+```
+
+Ne pas définir `PORT` sur Render.
+
+**Vercel → Environment Variables** (Production + Preview), puis Redeploy :
+
+```
+NEXT_PUBLIC_API_URL=https://YOUR-SERVICE.onrender.com/api
+```
 
 Si le site Vercel affiche `404 NOT_FOUND` :
 
