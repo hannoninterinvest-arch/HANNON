@@ -27,6 +27,17 @@ npm run dev
 
 Ouvrez [http://localhost:3000](http://localhost:3000).
 
+## Déploiement Vercel
+
+Ce projet est une application **Next.js**. Le fichier `vercel.json` force le Framework Preset `nextjs` et la commande `next build`.
+
+Si le site affiche `404 NOT_FOUND` :
+
+1. Vercel → Project → Settings → General → **Framework Preset = Next.js** (pas Other)
+2. Désactiver l’override **Output Directory** (ne pas pointer vers `public/`)
+3. Redeploy without cache
+4. Pour un site public, désactiver **Deployment Protection** (Vercel Authentication)
+
 ## Palette
 
 | Nom       | Hex       |
