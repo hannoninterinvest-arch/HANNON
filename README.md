@@ -75,12 +75,16 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api
 **API (`backend/.env`)**
 
 ```
+PORT=4000
+CORS_ORIGIN=*
 DATABASE_URL=postgresql://...neon.tech/neondb?sslmode=require
 JWT_SECRET=...
+JWT_EXPIRES_IN=7d
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
-FRONTEND_URL=http://localhost:3000
+ADMIN_EMAIL=admin@hannoninterinvest.com
+ADMIN_PASSWORD=HannonAdmin2026!
 ```
 
 ## Déploiement
