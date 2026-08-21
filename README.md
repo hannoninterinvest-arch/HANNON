@@ -86,7 +86,7 @@ FRONTEND_URL=http://localhost:3000
 ## Déploiement
 
 - **Front** : Vercel (`next build`). Définir `NEXT_PUBLIC_API_URL` vers l’API publique.
-- **API** : Render, Railway ou équivalent Node. Définir les variables Neon + Cloudinary + `FRONTEND_URL` (domaine Vercel, CORS).
+- **API** : Render, Railway ou équivalent Node. Définir les variables Neon + Cloudinary. Le CORS autorise toutes les origines (`*`).
 
 Si le site Vercel affiche `404 NOT_FOUND` :
 

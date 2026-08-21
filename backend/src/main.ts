@@ -9,10 +9,9 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
   app.enableCors({
-    origin: (process.env.FRONTEND_URL || "http://localhost:3000")
-      .split(",")
-      .map((o) => o.trim()),
-    credentials: true,
+    origin: "*",
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: "*",
   });
   app.useGlobalPipes(
     new ValidationPipe({
