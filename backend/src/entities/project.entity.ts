@@ -20,10 +20,10 @@ export class Project {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   title: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", length: 255, unique: true })
   slug: string;
 
   @Column({ type: "text" })
@@ -32,16 +32,16 @@ export class Project {
   @Column({ type: "text", nullable: true })
   summary: string | null;
 
-  @Column()
+  @Column({ type: "varchar", length: 120 })
   sector: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   location: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   imageUrl: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   cloudinaryPublicId: string | null;
 
   @Column({ type: "decimal", precision: 14, scale: 2, default: 0 })
@@ -62,7 +62,7 @@ export class Project {
   @Column({ type: "enum", enum: ProjectStatus, default: ProjectStatus.OPEN })
   status: ProjectStatus;
 
-  @Column({ default: true })
+  @Column({ type: "boolean", default: true })
   visible: boolean;
 
   @Column({ type: "simple-array", nullable: true })

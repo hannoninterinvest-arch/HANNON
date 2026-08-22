@@ -20,14 +20,23 @@ import { HealthController } from "./health.controller";
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const url = config.get<string>("DATABASE_URL");
-        if (!url) {
+        const rawUrl = config.get<string>("DATABASE_URL");
+        if (!rawUrl) {
           throw new Error("DATABASE_URL is required (Neon Postgres connection string)");
+        }
+        const local = /localhost|127\.0\.0\.1/.test(rawUrl);
+        let url = rawUrl;
+        if (
+          !local &&
+          url.includes("sslmode=require") &&
+          !url.includes("uselibpqcompat=")
+        ) {
+          url += url.includes("?") ? "&uselibpqcompat=true" : "?uselibpqcompat=true";
         }
         return {
           type: "postgres" as const,
           url,
-          ssl: url.includes("localhost") ? false : { rejectUnauthorized: false },
+          ssl: local ? false : { rejectUnauthorized: false },
           uuidExtension: "pgcrypto",
           entities: [User, Project, ProjectStat, InvestmentRequest],
           synchronize: true,

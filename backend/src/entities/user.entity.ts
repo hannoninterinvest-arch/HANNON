@@ -24,22 +24,22 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", length: 255, unique: true })
   email: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   password: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 120 })
   firstName: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 120 })
   lastName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   company: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 64, nullable: true })
   phone: string | null;
 
   @Column({ type: "enum", enum: UserRole, default: UserRole.INVESTOR })

@@ -11,7 +11,7 @@ export class ProjectStat {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 64 })
   label: string;
 
   @Column({ type: "int", default: 0 })
