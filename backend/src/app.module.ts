@@ -25,10 +25,13 @@ import { HealthController } from "./health.controller";
           throw new Error("DATABASE_URL is required (Neon Postgres connection string)");
         }
         const local = /localhost|127\.0\.0\.1/.test(rawUrl);
-        let url = rawUrl;
+        let url = rawUrl
+          .replace(/&?channel_binding=require/g, "")
+          .replace(/\?&/, "?")
+          .replace(/\?$/, "");
         if (
           !local &&
-          url.includes("sslmode=require") &&
+          /sslmode=require/.test(url) &&
           !url.includes("uselibpqcompat=")
         ) {
           url += url.includes("?") ? "&uselibpqcompat=true" : "?uselibpqcompat=true";
