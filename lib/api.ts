@@ -22,7 +22,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${API}${path}`, { ...options, headers });
+  const res = await fetch(`${API}${path}`, { cache: "no-store", ...options, headers });
   if (res.status === 204) return undefined as T;
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -39,6 +39,15 @@ export const money = (value: string | number) =>
   }).format(Number(value) || 0);
 
 export const pct = (value: string | number) => `${Number(value).toFixed(1)}%`;
+
+export async function uploadServiceImage(file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  return api<{ imageUrl: string; cloudinaryPublicId: string }>("/services/upload", {
+    method: "POST",
+    body,
+  });
+}
 
 export const progressOf = (raised: string | number, target: string | number) => {
   const t = Number(target);

@@ -4,27 +4,34 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardShell from "@/components/DashboardShell";
 import { api, money } from "@/lib/api";
-import type { AuthUser, InvestmentRequest, Project } from "@/lib/types";
+import type { AuthUser, HannonService, InvestmentRequest, InvestorInquiry, Project } from "@/lib/types";
 
 export default function AdminHomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [investors, setInvestors] = useState<AuthUser[]>([]);
   const [requests, setRequests] = useState<InvestmentRequest[]>([]);
+  const [services, setServices] = useState<HannonService[]>([]);
+  const [inquiries, setInquiries] = useState<InvestorInquiry[]>([]);
 
   useEffect(() => {
     api<Project[]>("/projects/admin/all").then(setProjects).catch(() => []);
     api<AuthUser[]>("/users/investors").then(setInvestors).catch(() => []);
     api<InvestmentRequest[]>("/investments").then(setRequests).catch(() => []);
+    api<HannonService[]>("/services/admin/all").then(setServices).catch(() => []);
+    api<InvestorInquiry[]>("/inquiries").then(setInquiries).catch(() => []);
   }, []);
 
   const pendingInvestors = investors.filter((i) => i.status === "pending").length;
   const pendingRequests = requests.filter((r) => r.status === "pending").length;
+  const newInquiries = inquiries.filter((item) => item.status === "nouveau").length;
 
   return (
     <DashboardShell title="Administration">
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {[
           ["Projects", projects.length, "/admin/projects"],
+          ["Services", services.length, "/admin/services"],
+          ["Propositions et questions", newInquiries, "/admin/inquiries"],
           ["Investors", investors.length, "/admin/investors"],
           ["Pending investors", pendingInvestors, "/admin/investors"],
           ["Pending requests", pendingRequests, "/admin/requests"],

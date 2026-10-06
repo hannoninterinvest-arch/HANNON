@@ -2,16 +2,14 @@ import Image from "next/image";
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/projects", label: "Projects" },
-  { href: "/#services", label: "Services" },
-  { href: "/login", label: "Investor portal" },
+  { href: "/services", label: "Services" },
+  { href: "/contact", label: "Contact" },
+  { href: "/login", label: "Administration" },
 ];
 
 const SERVICE_LINKS = [
-  "Sovereign Financing Advisory",
-  "Capital Raising",
-  "Project & Infrastructure Finance",
-  "Public-Private Partnerships",
-  "Strategic Financial Structuring",
+  { href: "/services", label: "Tous les services" },
+  { href: "/contact", label: "Envoyer une proposition" },
 ];
 
 export default function Footer() {
@@ -64,10 +62,10 @@ export default function Footer() {
             Services
           </h4>
           <ul>
-            {SERVICE_LINKS.map((label) => (
-              <li key={label} className="mb-[11px]">
-                <a href="/#services" className="text-[12.5px] font-light text-muted hover:text-gold-400">
-                  {label}
+            {SERVICE_LINKS.map((link) => (
+              <li key={link.href} className="mb-[11px]">
+                <a href={link.href} className="text-[12.5px] font-light text-muted hover:text-gold-400">
+                  {link.label}
                 </a>
               </li>
             ))}

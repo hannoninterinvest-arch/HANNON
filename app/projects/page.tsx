@@ -24,7 +24,6 @@ export default function ProjectsPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-sm font-light leading-relaxed text-muted-dark">
           Explore live opportunities originated and structured by HANNON.
-          Approved investors may submit a request on each visible mandate.
         </p>
         {error && <p className="mt-6 text-sm text-[#8a2a2a]">{error}</p>}
         <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">

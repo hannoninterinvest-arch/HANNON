@@ -9,17 +9,17 @@ import { useAuth } from "@/lib/auth";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/#about", label: "About" },
-  { href: "/#services", label: "Services" },
+  { href: "/services", label: "Services" },
   { href: "/projects", label: "Projects" },
   { href: "/#reach", label: "Global Reach" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const portalHref = user?.role === "admin" ? "/admin" : "/dashboard";
+  const isAdmin = user?.role === "admin";
 
   return (
     <header className="sticky top-0 z-[100] border-b border-white/[0.06] bg-navy-900/[0.92] backdrop-blur-md">
@@ -49,9 +49,13 @@ export default function Navbar() {
               const active =
                 link.href === "/projects"
                   ? pathname.startsWith("/projects")
-                  : link.href === "/"
-                    ? pathname === "/"
-                    : false;
+                  : link.href === "/services"
+                    ? pathname.startsWith("/services")
+                    : link.href === "/contact"
+                      ? pathname.startsWith("/contact")
+                      : link.href === "/"
+                        ? pathname === "/"
+                        : false;
               return (
                 <li key={link.href}>
                   <Link
@@ -69,13 +73,13 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {user ? (
+          {isAdmin && (
             <>
               <Link
-                href={portalHref}
+                href="/admin"
                 className="hidden rounded-[2px] border border-gold-500 px-4 py-2.5 text-[10.5px] tracking-[1.5px] text-gold-400 transition-colors hover:bg-gold-500 hover:text-navy-900 sm:inline-flex"
               >
-                {user.role === "admin" ? "Admin console" : "Investor portal"}
+                Admin console
               </Link>
               <button
                 onClick={logout}
@@ -83,21 +87,6 @@ export default function Navbar() {
               >
                 Sign out
               </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="hidden text-[10.5px] uppercase tracking-[1.5px] text-[#c7d1e0] hover:text-gold-400 sm:inline"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-[2px] border border-gold-500 px-4 py-2.5 text-[10.5px] tracking-[1.5px] text-gold-400 transition-colors duration-200 hover:bg-gold-500 hover:text-navy-900"
-              >
-                Become an investor
-              </Link>
             </>
           )}
           <button
@@ -126,15 +115,17 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href={user ? portalHref : "/login"}
-                onClick={() => setOpen(false)}
-                className="text-[11.5px] font-medium uppercase tracking-[1.5px] text-gold-400"
-              >
-                {user ? "Portal" : "Sign in"}
-              </Link>
-            </li>
+            {isAdmin && (
+              <li>
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className="text-[11.5px] font-medium uppercase tracking-[1.5px] text-gold-400"
+                >
+                  Admin console
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       )}

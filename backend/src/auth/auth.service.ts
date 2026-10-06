@@ -1,11 +1,11 @@
 import {
-  ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
-import { User, UserRole, UserStatus } from "../entities/user.entity";
+import { User, UserRole } from "../entities/user.entity";
 import { UsersService } from "../users/users.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -17,27 +17,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto) {
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) {
-      throw new ConflictException("An account with this email already exists");
-    }
-    const password = await bcrypt.hash(dto.password, 12);
-    const user = await this.usersService.create({
-      email: dto.email.toLowerCase(),
-      password,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      company: dto.company ?? null,
-      phone: dto.phone ?? null,
-      role: UserRole.INVESTOR,
-      status: UserStatus.PENDING,
-    });
-    return {
-      user: this.sanitize(user),
-      message:
-        "Account created. An administrator will review your profile before you can invest.",
-    };
+  async register(_dto: RegisterDto) {
+    throw new ForbiddenException(
+      "La création de comptes investisseurs est désactivée. Envoyez votre proposition ou votre question via le formulaire de contact.",
+    );
   }
 
   async login(dto: LoginDto) {
@@ -45,9 +28,9 @@ export class AuthService {
     if (!user) throw new UnauthorizedException("Invalid credentials");
     const ok = await bcrypt.compare(dto.password, user.password);
     if (!ok) throw new UnauthorizedException("Invalid credentials");
-    if (user.role === UserRole.INVESTOR && user.status === UserStatus.REJECTED) {
+    if (user.role !== UserRole.ADMIN) {
       throw new UnauthorizedException(
-        "Your investor account has been declined. Please contact HANNON.",
+        "La connexion réservée aux investisseurs n'est plus disponible. Envoyez votre proposition ou votre question via le formulaire de contact.",
       );
     }
     return {

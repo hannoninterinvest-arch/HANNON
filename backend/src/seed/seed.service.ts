@@ -5,6 +5,10 @@ import * as bcrypt from "bcryptjs";
 import { User, UserRole, UserStatus } from "../entities/user.entity";
 import { Project, ProjectStatus } from "../entities/project.entity";
 import { ProjectStat } from "../entities/project-stat.entity";
+import { Service } from "../entities/service.entity";
+import { ServicePlatform } from "../entities/service-platform.entity";
+import { PublishStatus } from "../entities/publish-status.enum";
+import { normalizeName, slugify } from "../common/slug";
 
 const CLOUD = "https://res.cloudinary.com/dbzweuzla/image/upload";
 
@@ -16,12 +20,15 @@ export class SeedService implements OnModuleInit {
     @InjectRepository(User) private users: Repository<User>,
     @InjectRepository(Project) private projects: Repository<Project>,
     @InjectRepository(ProjectStat) private stats: Repository<ProjectStat>,
+    @InjectRepository(Service) private services: Repository<Service>,
+    @InjectRepository(ServicePlatform) private platforms: Repository<ServicePlatform>,
   ) {}
 
   async onModuleInit() {
     await this.ensureAdmin();
     await this.ensureDemoInvestor();
     await this.ensureProjects();
+    await this.ensureHannonServices();
   }
 
   private async ensureAdmin() {
@@ -194,6 +201,84 @@ export class SeedService implements OnModuleInit {
       await this.projects.save(project);
     }
     this.log.log("Seeded investment projects");
+  }
+
+  private async ensureHannonServices() {
+    const names = [
+      "HANNON Finance",
+      "HANNON Tech",
+      "HANNON Artisanal",
+      "HANNON Prod",
+      "HANNON Affichage Urbain — Publicité de rue",
+      "HANNON Investissement et Management Transitoire",
+      "HANNON Education Tech",
+      "HANNON Recherche et Développement",
+      "HANNON Healthcare",
+      "HANNON Énergie",
+      "HANNON Startups",
+      "HANNON Commerce International",
+      "HANNON IA",
+      "HANNON Agriculture",
+    ];
+
+    const existing = await this.services.find();
+    const knownNames = new Set(existing.map((service) => normalizeName(service.name)));
+    const knownSlugs = new Set(existing.map((service) => service.slug));
+    let order =
+      existing.reduce((max, service) => Math.max(max, service.sortOrder), -1) + 1;
+    let created = 0;
+
+    for (const name of names) {
+      const slug = slugify(name);
+      if (knownNames.has(normalizeName(name)) || knownSlugs.has(slug)) continue;
+      await this.services.save(
+        this.services.create({
+          name,
+          slug,
+          description: "",
+          imageUrl: null,
+          cloudinaryPublicId: null,
+          sortOrder: order++,
+          status: PublishStatus.DRAFT,
+          placeholdersPrepared: false,
+        }),
+      );
+      knownNames.add(normalizeName(name));
+      knownSlugs.add(slug);
+      created += 1;
+    }
+    if (created) this.log.log(`Prepared ${created} draft HANNON services`);
+    await this.ensureFinancePlaceholders();
+  }
+
+  private async ensureFinancePlaceholders() {
+    const services = await this.services.find({ relations: ["platforms"] });
+    const finance = services.find(
+      (service) => normalizeName(service.name) === normalizeName("HANNON Finance"),
+    );
+    if (!finance || finance.placeholdersPrepared) return;
+
+    if (!finance.platforms?.length) {
+      for (let index = 0; index < 3; index += 1) {
+        await this.platforms.save(
+          this.platforms.create({
+            service: finance,
+            name: "",
+            description: "",
+            link: null,
+            imageUrl: null,
+            imagePublicId: null,
+            secondImageUrl: null,
+            secondImagePublicId: null,
+            sortOrder: index,
+            status: PublishStatus.DRAFT,
+          }),
+        );
+      }
+      this.log.log("Prepared 3 blank draft platforms for HANNON Finance");
+    }
+
+    await this.services.update(finance.id, { placeholdersPrepared: true });
   }
 
   private buildStats(raised: number, expectedReturn: number) {

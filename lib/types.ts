@@ -55,3 +55,41 @@ export type InvestmentRequest = {
   project: Project;
   investor?: AuthUser;
 };
+
+export type PublishStatus = "draft" | "published";
+export type InquiryType = "proposition" | "question";
+export type InquiryStatus = "nouveau" | "traité";
+
+export type ServicePlatform = {
+  id: string;
+  name: string;
+  description: string;
+  link: string | null;
+  imageUrl: string | null;
+  imagePublicId?: string | null;
+  secondImageUrl: string | null;
+  secondImagePublicId?: string | null;
+  sortOrder: number;
+  status?: PublishStatus;
+};
+
+export type HannonService = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string | null;
+  cloudinaryPublicId?: string | null;
+  sortOrder: number;
+  status?: PublishStatus;
+  platforms?: ServicePlatform[];
+};
+
+export type InvestorInquiry = {
+  id: string;
+  email: string;
+  type: InquiryType;
+  message: string;
+  receivedAt: string;
+  status: InquiryStatus;
+};

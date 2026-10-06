@@ -1,12 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +18,14 @@ export default function LoginPage() {
     setBusy(true);
     try {
       const user = await login(email, password);
-      router.push(user.role === "admin" ? "/admin" : "/dashboard");
+      if (user.role !== "admin") {
+        logout();
+        setError(
+          "La connexion réservée aux investisseurs n'est plus disponible. Utilisez le formulaire de contact.",
+        );
+        return;
+      }
+      router.push("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in");
     } finally {
@@ -33,10 +39,10 @@ export default function LoginPage() {
         onSubmit={onSubmit}
         className="card-shadow w-full max-w-md rounded-[6px] bg-white p-8"
       >
-        <div className="eyebrow">Investor access</div>
+        <div className="eyebrow">Administration</div>
         <h1 className="mt-2 font-serif text-3xl text-navy-900">Sign in</h1>
         <p className="mt-2 text-sm text-muted-dark">
-          Access HANNON project mandates, statistics and investment requests.
+          Accès réservé aux administrateurs HANNON.
         </p>
         {error && (
           <p className="mt-4 rounded-[3px] bg-[#f8e4e4] px-3 py-2 text-sm text-[#8a2a2a]">
@@ -65,14 +71,8 @@ export default function LoginPage() {
           />
         </label>
         <button disabled={busy} className="btn btn-gold mt-6 w-full justify-center">
-          {busy ? "Signing in…" : "Enter portal"}
+          {busy ? "Signing in…" : "Enter console"}
         </button>
-        <p className="mt-4 text-center text-sm text-muted-dark">
-          No account yet?{" "}
-          <Link href="/register" className="text-gold-500 hover:underline">
-            Request access
-          </Link>
-        </p>
       </form>
     </main>
   );

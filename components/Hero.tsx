@@ -53,8 +53,8 @@ export default function Hero() {
             <a href="/projects" className="btn btn-gold font-sans">
               Explore Projects →
             </a>
-            <a href="/register" className="btn btn-outline font-sans">
-              Become an Investor
+            <a href="/contact" className="btn btn-outline font-sans">
+              Envoyer une proposition
             </a>
           </div>
         </div>

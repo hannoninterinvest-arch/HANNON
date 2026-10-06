@@ -45,9 +45,12 @@ export class UsersService {
 
   async updateStatus(id: string, status: UserStatus) {
     const user = await this.findById(id);
+    if (user.role !== UserRole.INVESTOR) {
+      throw new NotFoundException("Investor not found");
+    }
+    await this.repo.update(id, { status });
     user.status = status;
-    const saved = await this.repo.save(user);
-    const { password: _p, ...safe } = saved;
+    const { password: _p, ...safe } = user;
     return safe;
   }
 

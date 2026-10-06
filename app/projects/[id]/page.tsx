@@ -1,52 +1,23 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api, money, pct, progressOf } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
 import type { Project } from "@/lib/types";
 import ProjectCharts from "@/components/ProjectCharts";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
-  const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState("");
-  const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState("");
-  const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     api<Project>(`/projects/${params.id}`)
       .then(setProject)
       .catch((e) => setError(e.message));
   }, [params.id]);
-
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    setNotice("");
-    setBusy(true);
-    try {
-      await api("/investments", {
-        method: "POST",
-        body: JSON.stringify({
-          projectId: params.id,
-          amount: Number(amount),
-          message,
-        }),
-      });
-      setNotice("Your investment request has been sent to HANNON for review.");
-      setAmount("");
-      setMessage("");
-    } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Unable to send request");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   if (error) {
     return (
@@ -62,7 +33,6 @@ export default function ProjectDetailPage() {
   }
 
   const progress = progressOf(project.raisedAmount, project.targetAmount);
-  const canInvest = user?.role === "investor" && user.status === "approved";
 
   return (
     <main className="bg-ivory pb-20">
@@ -164,49 +134,15 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="card-shadow rounded-[6px] bg-navy-900 p-6 text-white">
-            <h3 className="font-serif text-2xl">Request an allocation</h3>
-            {!user && (
-              <p className="mt-3 text-sm text-muted">
-                <Link href="/login" className="text-gold-400 underline">
-                  Sign in
-                </Link>{" "}
-                as an approved investor to submit a request.
-              </p>
-            )}
-            {user?.role === "investor" && user.status !== "approved" && (
-              <p className="mt-3 text-sm text-gold-400">
-                Your account is awaiting administrator approval.
-              </p>
-            )}
-            {user?.role === "admin" && (
-              <p className="mt-3 text-sm text-muted">
-                Administrators review requests from the admin console.
-              </p>
-            )}
-            {canInvest && (
-              <form onSubmit={submit} className="mt-5 space-y-3">
-                <input
-                  required
-                  type="number"
-                  min={Number(project.minInvestment)}
-                  placeholder="Amount (USD)"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full rounded-[3px] border border-white/15 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-gold-500"
-                />
-                <textarea
-                  rows={3}
-                  placeholder="Optional note"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full rounded-[3px] border border-white/15 bg-white/5 px-3 py-2.5 text-sm outline-none focus:border-gold-500"
-                />
-                <button disabled={busy} className="btn btn-gold w-full justify-center">
-                  {busy ? "Sending…" : "Send investment request"}
-                </button>
-              </form>
-            )}
-            {notice && <p className="mt-3 text-sm text-gold-300">{notice}</p>}
+            <h3 className="font-serif text-2xl">
+              Envoyez votre proposition ou votre question
+            </h3>
+            <p className="mt-3 text-sm text-muted">
+              Aucun compte n&apos;est nécessaire pour écrire à HANNON au sujet de ce projet.
+            </p>
+            <Link href="/contact" className="btn btn-gold mt-5 w-full justify-center">
+              Écrire à HANNON
+            </Link>
           </div>
         </aside>
       </div>

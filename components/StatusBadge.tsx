@@ -11,6 +11,20 @@ export default function StatusBadge({
     open: "bg-[#e7eef8] text-[#1d3d6e]",
     funded: "bg-[#e5f2ea] text-[#1f6b3a]",
     closed: "bg-[#eee] text-[#555]",
+    draft: "bg-[#f4ead2] text-[#8a6a24]",
+    published: "bg-[#e5f2ea] text-[#1f6b3a]",
+    nouveau: "bg-[#e7eef8] text-[#1d3d6e]",
+    "traité": "bg-[#e5f2ea] text-[#1f6b3a]",
+    proposition: "bg-[#f4ead2] text-[#8a6a24]",
+    question: "bg-[#e7eef8] text-[#1d3d6e]",
+  };
+  const labels: Record<string, string> = {
+    draft: "Brouillon",
+    published: "Publié",
+    nouveau: "Nouveau",
+    "traité": "Traité",
+    proposition: "Proposition",
+    question: "Question",
   };
   return (
     <span
@@ -18,7 +32,7 @@ export default function StatusBadge({
         map[status] || "bg-[#eee] text-[#555]"
       }`}
     >
-      {status}
+      {labels[status] || status}
     </span>
   );
 }
