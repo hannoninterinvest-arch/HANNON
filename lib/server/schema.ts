@@ -183,6 +183,7 @@ BEGIN
 
 END $$`,
   ensureIdDefault("users"),
+  ensureNotNullDefaults("users"),
   `CREATE TABLE IF NOT EXISTS "projects" (
      "id" uuid NOT NULL DEFAULT gen_random_uuid(),
      "title" character varying(255) NOT NULL,
@@ -309,6 +310,74 @@ END $$`,
   ensureIdDefault("investor_inquiries"),
   ensureIdDefault("inquiry_throttles"),
 ];
+
+function ensureNotNullDefaults(table: string) {
+  const name = sqlIdent(table);
+  return `DO $$
+DECLARE
+  rec record;
+  enum_label text;
+BEGIN
+  IF to_regclass('${name}') IS NULL THEN
+    RETURN;
+  END IF;
+
+  FOR rec IN
+    SELECT a.attname,
+           a.atttypid,
+           t.typtype,
+           t.typname,
+           format_type(a.atttypid, a.atttypmod) AS sql_type
+    FROM pg_attribute a
+    JOIN pg_type t ON t.oid = a.atttypid
+    LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum
+    WHERE a.attrelid = '${name}'::regclass
+      AND a.attnum > 0
+      AND NOT a.attisdropped
+      AND a.attnotnull
+      AND a.attidentity = ''
+      AND a.attgenerated = ''
+      AND a.attname <> 'email'
+      AND (NOT a.atthasdef OR pg_get_expr(d.adbin, d.adrelid) IS NULL OR btrim(pg_get_expr(d.adbin, d.adrelid)) = 'NULL')
+  LOOP
+    IF rec.attname = 'id' THEN
+      CONTINUE;
+    END IF;
+    BEGIN
+      IF rec.typname IN ('text', 'varchar', 'bpchar', 'citext', 'name') THEN
+        EXECUTE format('ALTER TABLE %s ALTER COLUMN %I SET DEFAULT %L', '${name}'::regclass, rec.attname, '');
+      ELSIF rec.typname = 'bool' THEN
+        EXECUTE format('ALTER TABLE %s ALTER COLUMN %I SET DEFAULT false', '${name}'::regclass, rec.attname);
+      ELSIF rec.typname IN ('int2', 'int4', 'int8', 'numeric', 'float4', 'float8') THEN
+        EXECUTE format('ALTER TABLE %s ALTER COLUMN %I SET DEFAULT 0', '${name}'::regclass, rec.attname);
+      ELSIF rec.typname IN ('timestamp', 'timestamptz', 'date') THEN
+        EXECUTE format('ALTER TABLE %s ALTER COLUMN %I SET DEFAULT now()', '${name}'::regclass, rec.attname);
+      ELSIF rec.typname = 'uuid' THEN
+        EXECUTE format('ALTER TABLE %s ALTER COLUMN %I SET DEFAULT gen_random_uuid()', '${name}'::regclass, rec.attname);
+      ELSIF rec.typname IN ('json', 'jsonb') THEN
+        EXECUTE format('ALTER TABLE %s ALTER COLUMN %I SET DEFAULT %L::%s', '${name}'::regclass, rec.attname, '{}', rec.sql_type);
+      ELSIF rec.typtype = 'e' THEN
+        SELECT e.enumlabel INTO enum_label
+        FROM pg_enum e
+        WHERE e.enumtypid = rec.atttypid
+        ORDER BY e.enumsortorder
+        LIMIT 1;
+        IF enum_label IS NOT NULL THEN
+          EXECUTE format(
+            'ALTER TABLE %s ALTER COLUMN %I SET DEFAULT %L::%s',
+            '${name}'::regclass,
+            rec.attname,
+            enum_label,
+            rec.sql_type
+          );
+        END IF;
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      NULL;
+    END;
+  END LOOP;
+END $$`;
+}
 
 function ensureIdDefault(table: string) {
   const name = sqlIdent(table);
