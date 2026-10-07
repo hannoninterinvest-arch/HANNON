@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+const API = "/api";
 
 function messageFrom(data: unknown, fallback: string) {
   if (!data || typeof data !== "object") return fallback;
