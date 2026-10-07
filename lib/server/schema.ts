@@ -140,53 +140,159 @@ const STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS "IDX_inquiries_type_status" ON "investor_inquiries" ("type", "status")`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiries_email_received" ON "investor_inquiries" ("email", "receivedAt")`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiry_throttles_ip" ON "inquiry_throttles" ("ipHash", "createdAt")`,
-  `DO $$ BEGIN
-     IF NOT EXISTS (
-       SELECT 1 FROM pg_constraint c
-       JOIN pg_class t ON c.conrelid = t.oid
-       WHERE t.relname = 'project_stats' AND c.contype = 'f'
-     ) THEN
-       ALTER TABLE "project_stats"
-         ADD CONSTRAINT "FK_project_stats_project"
-         FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE;
-     END IF;
-   END $$`,
-  `DO $$ BEGIN
-     IF NOT EXISTS (
-       SELECT 1 FROM pg_constraint c
-       JOIN pg_class t ON c.conrelid = t.oid
-       WHERE t.relname = 'investment_requests' AND c.contype = 'f'
-         AND pg_get_constraintdef(c.oid) LIKE '%investorId%'
-     ) THEN
-       ALTER TABLE "investment_requests"
-         ADD CONSTRAINT "FK_investment_requests_investor"
-         FOREIGN KEY ("investorId") REFERENCES "users"("id") ON DELETE CASCADE;
-     END IF;
-   END $$`,
-  `DO $$ BEGIN
-     IF NOT EXISTS (
-       SELECT 1 FROM pg_constraint c
-       JOIN pg_class t ON c.conrelid = t.oid
-       WHERE t.relname = 'investment_requests' AND c.contype = 'f'
-         AND pg_get_constraintdef(c.oid) LIKE '%projectId%'
-     ) THEN
-       ALTER TABLE "investment_requests"
-         ADD CONSTRAINT "FK_investment_requests_project"
-         FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE;
-     END IF;
-   END $$`,
-  `DO $$ BEGIN
-     IF NOT EXISTS (
-       SELECT 1 FROM pg_constraint c
-       JOIN pg_class t ON c.conrelid = t.oid
-       WHERE t.relname = 'service_platforms' AND c.contype = 'f'
-     ) THEN
-       ALTER TABLE "service_platforms"
-         ADD CONSTRAINT "FK_service_platforms_service"
-         FOREIGN KEY ("serviceId") REFERENCES "services"("id") ON DELETE CASCADE;
-     END IF;
-   END $$`,
+  ensureForeignKey("project_stats", "projectId", "projects", "id", "FK_project_stats_project"),
+  ensureForeignKey(
+    "investment_requests",
+    "investorId",
+    "users",
+    "id",
+    "FK_investment_requests_investor",
+  ),
+  ensureForeignKey(
+    "investment_requests",
+    "projectId",
+    "projects",
+    "id",
+    "FK_investment_requests_project",
+  ),
+  ensureForeignKey(
+    "service_platforms",
+    "serviceId",
+    "services",
+    "id",
+    "FK_service_platforms_service",
+  ),
 ];
+
+function sqlIdent(value: string) {
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
+    throw new Error(`Identifiant SQL refusé: ${value}`);
+  }
+  return value;
+}
+
+// Existing databases may store the foreign-key column as text while the
+// referenced id is uuid (or the reverse). Postgres then rejects the
+// constraint with "cannot be implemented". Align only a lossless text/uuid
+// pair, and leave every other mismatch untouched so startup can continue.
+function ensureForeignKey(
+  table: string,
+  column: string,
+  refTable: string,
+  refColumn: string,
+  constraint: string,
+) {
+  const childTable = sqlIdent(table);
+  const childColumn = sqlIdent(column);
+  const parentTable = sqlIdent(refTable);
+  const parentColumn = sqlIdent(refColumn);
+  const constraintName = sqlIdent(constraint);
+  return `DO $$
+DECLARE
+  child_typid oid;
+  parent_typid oid;
+  parent_typmod integer;
+  parent_sql text;
+  invalid_count bigint;
+  uuid_type oid := 'uuid'::regtype;
+  text_type oid := 'text'::regtype;
+  varchar_type oid := 'varchar'::regtype;
+  bpchar_type oid := 'bpchar'::regtype;
+BEGIN
+  IF to_regclass('${childTable}') IS NULL OR to_regclass('${parentTable}') IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_constraint c
+    JOIN pg_class t ON c.conrelid = t.oid
+    WHERE t.oid = '${childTable}'::regclass
+      AND c.contype = 'f'
+      AND pg_get_constraintdef(c.oid) ILIKE '%${childColumn}%'
+  ) THEN
+    RETURN;
+  END IF;
+
+  SELECT a.atttypid, a.atttypmod, format_type(a.atttypid, a.atttypmod)
+    INTO parent_typid, parent_typmod, parent_sql
+  FROM pg_attribute a
+  WHERE a.attrelid = '${parentTable}'::regclass
+    AND a.attname = '${parentColumn}'
+    AND a.attnum > 0
+    AND NOT a.attisdropped;
+
+  SELECT a.atttypid
+    INTO child_typid
+  FROM pg_attribute a
+  WHERE a.attrelid = '${childTable}'::regclass
+    AND a.attname = '${childColumn}'
+    AND a.attnum > 0
+    AND NOT a.attisdropped;
+
+  IF child_typid IS NULL OR parent_typid IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF child_typid <> parent_typid THEN
+    IF child_typid IN (text_type, varchar_type, bpchar_type) AND parent_typid = uuid_type THEN
+      EXECUTE format(
+        'SELECT count(*) FROM %s WHERE %I IS NOT NULL AND btrim(%I::text) !~ %L',
+        '${childTable}'::regclass,
+        '${childColumn}',
+        '${childColumn}',
+        '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+      ) INTO invalid_count;
+      IF invalid_count > 0 THEN
+        RETURN;
+      END IF;
+      BEGIN
+        EXECUTE format(
+          'ALTER TABLE %s ALTER COLUMN %I TYPE uuid USING btrim(%I::text)::uuid',
+          '${childTable}'::regclass,
+          '${childColumn}',
+          '${childColumn}'
+        );
+      EXCEPTION WHEN OTHERS THEN
+        RETURN;
+      END;
+    ELSIF child_typid = uuid_type AND parent_typid IN (text_type, varchar_type, bpchar_type) THEN
+      IF parent_typid IN (varchar_type, bpchar_type)
+         AND parent_typmod > 0
+         AND (parent_typmod - 4) < 36 THEN
+        RETURN;
+      END IF;
+      BEGIN
+        EXECUTE format(
+          'ALTER TABLE %s ALTER COLUMN %I TYPE %s USING %I::text',
+          '${childTable}'::regclass,
+          '${childColumn}',
+          parent_sql,
+          '${childColumn}'
+        );
+      EXCEPTION WHEN OTHERS THEN
+        RETURN;
+      END;
+    ELSE
+      RETURN;
+    END IF;
+  END IF;
+
+  BEGIN
+    EXECUTE format(
+      'ALTER TABLE %s ADD CONSTRAINT %I FOREIGN KEY (%I) REFERENCES %s (%I) ON DELETE CASCADE',
+      '${childTable}'::regclass,
+      '${constraintName}',
+      '${childColumn}',
+      '${parentTable}'::regclass,
+      '${parentColumn}'
+    );
+  EXCEPTION
+    WHEN datatype_mismatch OR duplicate_object OR foreign_key_violation THEN
+      NULL;
+  END;
+END $$`;
+}
 
 export async function applySchema(client: PoolClient) {
   try {
