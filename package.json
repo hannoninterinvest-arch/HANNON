@@ -7,9 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "dev:api": "npm run start:dev --prefix backend",
     "build": "next build",
-    "build:api": "npm run build --prefix backend",
     "start": "next start",
     "lint": "next lint"
   },

@@ -1,7 +1,10 @@
+import dns from "dns";
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
 import { HttpError } from "./http";
 import { applySchema } from "./schema";
 import { seed } from "./seed";
+
+dns.setDefaultResultOrder("ipv4first");
 
 let pool: Pool | null = null;
 let ready: Promise<void> | null = null;
@@ -26,6 +29,12 @@ function databaseConfig() {
   if (!local && /sslmode=require/.test(url) && !/uselibpqcompat=/.test(url)) {
     url += "&uselibpqcompat=true";
   }
+  if (!local) {
+    url = url.replace(/@([^/?]+)/, (_match, host: string) => {
+      if (!host.includes(".neon.tech") || host.includes("-pooler")) return `@${host}`;
+      return `@${host.replace(".", "-pooler.")}`;
+    });
+  }
   return { url, local };
 }
 
@@ -35,7 +44,9 @@ export function getPool() {
     pool = new Pool({
       connectionString: url,
       max: 1,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 8000,
+      idleTimeoutMillis: 10000,
+      statement_timeout: 8000,
       ssl: local ? false : { rejectUnauthorized: false },
     });
   }
@@ -71,7 +82,6 @@ export async function ensureReady() {
 async function prepare() {
   const client = await getPool().connect();
   try {
-    await client.query("SELECT pg_advisory_lock(842017)");
     await applySchema(client);
     await seed(client);
   } catch (error) {
@@ -79,11 +89,6 @@ async function prepare() {
     const message = error instanceof Error ? error.message : "Erreur PostgreSQL";
     throw new HttpError(500, message);
   } finally {
-    try {
-      await client.query("SELECT pg_advisory_unlock(842017)");
-    } catch {
-      // The session ends with release if unlock fails.
-    }
     client.release();
   }
 }

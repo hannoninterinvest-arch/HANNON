@@ -9,8 +9,6 @@ Site Next.js déployé entièrement sur **Vercel** : pages publiques, administra
 - **Base** : PostgreSQL (Neon)
 - **Médias** : Cloudinary (`hannon/projects`, `hannon/services`)
 
-Le dossier `backend/` conserve l’ancienne API NestJS. Vercel ne la construit pas et ne l’exécute pas.
-
 ## Fonctionnalités
 
 - **Services** enregistrés dans PostgreSQL : création, modification, photo, publication, ordre, page `/services/[slug]`
@@ -86,7 +84,7 @@ Les photos sont limitées à 4 Mo, taille acceptée par Vercel. Elles sont envoy
 
 ## Schéma
 
-Le schéma est appliqué au premier appel API : tables créées seulement si elles manquent, sans `DROP` ni `DELETE`. La migration `backend/migrations/001_services_and_inquiries.sql` reste disponible pour une base déjà gérée à la main.
+Le schéma est appliqué au premier appel API : tables créées seulement si elles manquent, sans `DROP` ni `DELETE`.
 
 ## Déploiement Vercel
 
