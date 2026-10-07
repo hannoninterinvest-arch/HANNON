@@ -113,13 +113,31 @@ export async function seed(client: PoolClient) {
 
 async function ensureAdmin(client: PoolClient) {
   const email = (process.env.ADMIN_EMAIL || "admin@hannoninterinvest.com").toLowerCase();
-  const existing = await client.query(`SELECT id FROM users WHERE email = $1`, [email]);
-  if (existing.rowCount) return;
+  const existing = await client.query(
+    `SELECT id, password, role::text AS role, status::text AS status
+     FROM users WHERE lower(email) = $1`,
+    [email],
+  );
+  if (existing.rowCount) {
+    const row = existing.rows[0] as { id: string; password: string | null; role: string | null; status: string | null };
+    if (row.password && row.role && row.status) return;
+    const password = row.password || (await bcrypt.hash(process.env.ADMIN_PASSWORD || "HannonAdmin2026!", 12));
+    await client.query(
+      `UPDATE users
+          SET password = COALESCE(NULLIF(password, ''), $2),
+              role = COALESCE(role, 'admin'),
+              status = COALESCE(status, 'approved'),
+              "updatedAt" = now()
+        WHERE id = $1`,
+      [row.id, password],
+    );
+    return;
+  }
   const password = await bcrypt.hash(process.env.ADMIN_PASSWORD || "HannonAdmin2026!", 12);
   await client.query(
     `INSERT INTO users (email, password, "firstName", "lastName", company, role, status)
-     VALUES ($1, $2, 'HANNON', 'Administrator', 'HANNON International Investments Ltd', 'admin', 'approved')
-     ON CONFLICT (email) DO NOTHING`,
+     SELECT $1::text, $2::text, 'HANNON', 'Administrator', 'HANNON International Investments Ltd', 'admin', 'approved'
+     WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email::text) = lower($1::text))`,
     [email, password],
   );
 }
@@ -132,14 +150,14 @@ async function ensureDemoInvestors(client: PoolClient) {
   const password = await bcrypt.hash("Investor2026!", 12);
   await client.query(
     `INSERT INTO users (email, password, "firstName", "lastName", company, phone, role, status)
-     VALUES ($1, $2, 'Amine', 'Ben Salah', 'Atlas Capital Partners', '+216 20 000 000', 'investor', 'approved')
-     ON CONFLICT (email) DO NOTHING`,
+     SELECT $1::text, $2::text, 'Amine', 'Ben Salah', 'Atlas Capital Partners', '+216 20 000 000', 'investor', 'approved'
+     WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email::text) = lower($1::text))`,
     ["investor@hannoninterinvest.com", password],
   );
   await client.query(
     `INSERT INTO users (email, password, "firstName", "lastName", company, role, status)
-     VALUES ($1, $2, 'Leila', 'Mansour', 'Medina Family Office', 'investor', 'pending')
-     ON CONFLICT (email) DO NOTHING`,
+     SELECT $1::text, $2::text, 'Leila', 'Mansour', 'Medina Family Office', 'investor', 'pending'
+     WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email::text) = lower($1::text))`,
     ["pending@hannoninterinvest.com", password],
   );
 }

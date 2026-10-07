@@ -44,6 +44,158 @@ const STATEMENTS = [
      CONSTRAINT "PK_users" PRIMARY KEY ("id"),
      CONSTRAINT "UQ_users_email" UNIQUE ("email")
    )`,
+  // CREATE TABLE IF NOT EXISTS does nothing when users already exists.
+  // Older databases can lack password (or store it under another name).
+  // Add the missing columns, or rename a known hash column, without
+  // rewriting existing values.
+  `DO $$
+DECLARE
+  id_type oid;
+  id_has_default boolean;
+BEGIN
+  IF to_regclass('users') IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'password' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'passwordHash' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "passwordHash" TO "password";
+    ELSIF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'password_hash' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "password_hash" TO "password";
+    ELSIF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'hashedPassword' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "hashedPassword" TO "password";
+    ELSE
+      ALTER TABLE "users" ADD COLUMN "password" character varying(255);
+    END IF;
+  ELSIF EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'passwordHash' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    BEGIN
+      UPDATE "users"
+         SET "password" = "passwordHash"
+       WHERE "password" IS NULL
+         AND "passwordHash" IS NOT NULL;
+    EXCEPTION WHEN OTHERS THEN
+      NULL;
+    END;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'email' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    ALTER TABLE "users" ADD COLUMN "email" character varying(255);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'firstName' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'first_name' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "first_name" TO "firstName";
+    ELSE
+      ALTER TABLE "users" ADD COLUMN "firstName" character varying(120) DEFAULT '';
+    END IF;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'lastName' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'last_name' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "last_name" TO "lastName";
+    ELSE
+      ALTER TABLE "users" ADD COLUMN "lastName" character varying(120) DEFAULT '';
+    END IF;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'company' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    ALTER TABLE "users" ADD COLUMN "company" character varying(255);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'phone' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    ALTER TABLE "users" ADD COLUMN "phone" character varying(64);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'role' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    ALTER TABLE "users" ADD COLUMN "role" "users_role_enum";
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'status' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    ALTER TABLE "users" ADD COLUMN "status" "users_status_enum";
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'createdAt' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'created_at' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "created_at" TO "createdAt";
+    ELSE
+      ALTER TABLE "users" ADD COLUMN "createdAt" TIMESTAMP DEFAULT now();
+    END IF;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'users'::regclass AND attname = 'updatedAt' AND attnum > 0 AND NOT attisdropped
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM pg_attribute
+      WHERE attrelid = 'users'::regclass AND attname = 'updated_at' AND attnum > 0 AND NOT attisdropped
+    ) THEN
+      ALTER TABLE "users" RENAME COLUMN "updated_at" TO "updatedAt";
+    ELSE
+      ALTER TABLE "users" ADD COLUMN "updatedAt" TIMESTAMP DEFAULT now();
+    END IF;
+  END IF;
+
+  SELECT a.atttypid, a.atthasdef
+    INTO id_type, id_has_default
+  FROM pg_attribute a
+  WHERE a.attrelid = 'users'::regclass
+    AND a.attname = 'id'
+    AND a.attnum > 0
+    AND NOT a.attisdropped;
+
+  IF id_type = 'uuid'::regtype AND id_has_default = false THEN
+    ALTER TABLE "users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  END IF;
+END $$`,
   `CREATE TABLE IF NOT EXISTS "projects" (
      "id" uuid NOT NULL DEFAULT gen_random_uuid(),
      "title" character varying(255) NOT NULL,
