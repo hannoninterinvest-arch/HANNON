@@ -48,19 +48,28 @@ export async function login(body: Record<string, unknown>) {
      FROM users WHERE email = $1`,
     [email],
   );
-  if (!user) throw new HttpError(401, "Invalid credentials");
-  const ok = await bcrypt.compare(password, user.password);
-  if (!ok) throw new HttpError(401, "Invalid credentials");
+  if (!user || !user.password) throw new HttpError(401, "Invalid credentials");
+  let matches = false;
+  try {
+    matches = await bcrypt.compare(password, user.password);
+  } catch {
+    matches = false;
+  }
+  if (!matches) throw new HttpError(401, "Invalid credentials");
   if (user.role !== "admin") {
     throw new HttpError(
       401,
       "La connexion réservée aux investisseurs n'est plus disponible. Envoyez votre proposition ou votre question via le formulaire de contact.",
     );
   }
-  const expiresIn = (process.env.JWT_EXPIRES_IN || "7d") as SignOptions["expiresIn"];
-  const token = jwt.sign({ sub: user.id, email: user.email, role: user.role }, secret(), {
-    expiresIn,
-  });
+  const payload = { sub: user.id, email: user.email, role: user.role };
+  const requested = (process.env.JWT_EXPIRES_IN || "7d") as SignOptions["expiresIn"];
+  let token: string;
+  try {
+    token = jwt.sign(payload, secret(), { expiresIn: requested });
+  } catch {
+    token = jwt.sign(payload, secret(), { expiresIn: "7d" });
+  }
   return { token, user: publicUser(user) };
 }
 

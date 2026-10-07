@@ -192,9 +192,14 @@ export async function applySchema(client: PoolClient) {
   try {
     await client.query("CREATE EXTENSION IF NOT EXISTS pgcrypto");
   } catch {
-    await client.query("SELECT gen_random_uuid()");
+    // Postgres 13+ and Neon already provide gen_random_uuid().
   }
   for (const statement of STATEMENTS) {
-    await client.query(statement);
+    try {
+      await client.query(statement);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "erreur SQL";
+      throw new Error(message);
+    }
   }
 }

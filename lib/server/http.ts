@@ -5,8 +5,24 @@ export class HttpError extends Error {
 
   constructor(status: number, message: string) {
     super(message);
+    this.name = "HttpError";
     this.status = status;
   }
+}
+
+function isHttpError(error: unknown): error is HttpError {
+  if (error instanceof HttpError) return true;
+  if (!error || typeof error !== "object") return false;
+  const value = error as { name?: string; status?: unknown; message?: unknown };
+  return value.name === "HttpError" && typeof value.status === "number" && typeof value.message === "string";
+}
+
+function safeText(error: unknown) {
+  const text = error instanceof Error ? error.message : "";
+  return text
+    .replace(/postgres(?:ql)?:\/\/\S+/gi, "postgresql://…")
+    .replace(/password[=:]\S+/gi, "password=…")
+    .slice(0, 400);
 }
 
 export function ok(data: unknown, status = 200) {
@@ -17,21 +33,24 @@ export function ok(data: unknown, status = 200) {
 }
 
 export function fail(error: unknown) {
-  if (error instanceof HttpError) {
+  if (isHttpError(error)) {
     return ok({ message: error.message, statusCode: error.status }, error.status);
   }
   console.error(error);
-  const text = error instanceof Error ? error.message : "";
-  if (/ECONNREFUSED|ENOTFOUND|password authentication|no pg_hba|SSL/.test(text)) {
+  const text = safeText(error);
+  if (/ECONNREFUSED|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|ECONNRESET|password authentication|no pg_hba|certificate|SSL|channel_binding|Invalid URL/i.test(text)) {
     return ok(
       {
-        message: "Connexion à PostgreSQL impossible. Vérifiez DATABASE_URL sur Vercel.",
+        message: `Connexion à PostgreSQL impossible. Vérifiez DATABASE_URL sur Vercel. ${text}`.trim(),
         statusCode: 500,
       },
       500,
     );
   }
-  return ok({ message: "Erreur interne du serveur.", statusCode: 500 }, 500);
+  return ok(
+    { message: text || "Erreur interne du serveur.", statusCode: 500 },
+    500,
+  );
 }
 
 export function isUuid(value: string) {
