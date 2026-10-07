@@ -44,8 +44,8 @@ export async function login(body: Record<string, unknown>) {
     throw new HttpError(401, "Invalid credentials");
   }
   const user = await one<UserRow>(
-    `SELECT id, email, password, "firstName", "lastName", company, phone, role, status, "createdAt", "updatedAt"
-     FROM users WHERE email = $1`,
+    `SELECT id::text AS id, email, password, "firstName", "lastName", company, phone, role, status, "createdAt", "updatedAt"
+     FROM users WHERE lower(email::text) = $1`,
     [email],
   );
   if (!user || !user.password) throw new HttpError(401, "Invalid credentials");
@@ -83,10 +83,10 @@ export async function requireAdmin(req: NextRequest) {
   } catch {
     throw new HttpError(401, "Unauthorized");
   }
-  if (!payload.sub || !isUuid(payload.sub)) throw new HttpError(401, "Unauthorized");
+  if (!payload.sub) throw new HttpError(401, "Unauthorized");
   const user = await one<UserRow>(
-    `SELECT id, email, "firstName", "lastName", company, phone, role, status, "createdAt", "updatedAt"
-     FROM users WHERE id = $1`,
+    `SELECT id::text AS id, email, "firstName", "lastName", company, phone, role, status, "createdAt", "updatedAt"
+     FROM users WHERE id::text = $1`,
     [payload.sub],
   );
   if (!user) throw new HttpError(401, "Unauthorized");

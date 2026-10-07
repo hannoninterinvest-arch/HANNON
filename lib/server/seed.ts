@@ -104,11 +104,28 @@ const PROJECTS: Sample[] = [
   },
 ];
 
+const DEMO_EMAILS = ["investor@hannoninterinvest.com", "pending@hannoninterinvest.com"];
+
 export async function seed(client: PoolClient) {
   await ensureAdmin(client);
-  await ensureDemoInvestors(client);
-  await ensureProjects(client);
-  await ensureHannonServices(client);
+  await removeDemoAccounts(client).catch((error) => console.error(error));
+  await ensureProjects(client).catch((error) => console.error(error));
+  await ensureHannonServices(client).catch((error) => console.error(error));
+}
+
+async function removeDemoAccounts(client: PoolClient) {
+  try {
+    await client.query(
+      `DELETE FROM investment_requests
+        WHERE "investorId"::text IN (
+          SELECT id::text FROM users WHERE lower(email::text) = ANY($1::text[])
+        )`,
+      [DEMO_EMAILS],
+    );
+  } catch {
+    // Older databases may not have investment requests yet.
+  }
+  await client.query(`DELETE FROM users WHERE lower(email::text) = ANY($1::text[])`, [DEMO_EMAILS]);
 }
 
 async function ensureAdmin(client: PoolClient) {
@@ -139,26 +156,6 @@ async function ensureAdmin(client: PoolClient) {
      SELECT $1::text, $2::text, 'HANNON', 'Administrator', 'HANNON International Investments Ltd', 'admin', 'approved'
      WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email::text) = lower($1::text))`,
     [email, password],
-  );
-}
-
-async function ensureDemoInvestors(client: PoolClient) {
-  const existing = await client.query(`SELECT id FROM users WHERE email = $1`, [
-    "investor@hannoninterinvest.com",
-  ]);
-  if (existing.rowCount) return;
-  const password = await bcrypt.hash("Investor2026!", 12);
-  await client.query(
-    `INSERT INTO users (email, password, "firstName", "lastName", company, phone, role, status)
-     SELECT $1::text, $2::text, 'Amine', 'Ben Salah', 'Atlas Capital Partners', '+216 20 000 000', 'investor', 'approved'
-     WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email::text) = lower($1::text))`,
-    ["investor@hannoninterinvest.com", password],
-  );
-  await client.query(
-    `INSERT INTO users (email, password, "firstName", "lastName", company, role, status)
-     SELECT $1::text, $2::text, 'Leila', 'Mansour', 'Medina Family Office', 'investor', 'pending'
-     WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email::text) = lower($1::text))`,
-    ["pending@hannoninterinvest.com", password],
   );
 }
 

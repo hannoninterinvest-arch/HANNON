@@ -49,9 +49,6 @@ const STATEMENTS = [
   // Add the missing columns, or rename a known hash column, without
   // rewriting existing values.
   `DO $$
-DECLARE
-  id_type oid;
-  id_has_default boolean;
 BEGIN
   IF to_regclass('users') IS NULL THEN
     RETURN;
@@ -184,18 +181,8 @@ BEGIN
     END IF;
   END IF;
 
-  SELECT a.atttypid, a.atthasdef
-    INTO id_type, id_has_default
-  FROM pg_attribute a
-  WHERE a.attrelid = 'users'::regclass
-    AND a.attname = 'id'
-    AND a.attnum > 0
-    AND NOT a.attisdropped;
-
-  IF id_type = 'uuid'::regtype AND id_has_default = false THEN
-    ALTER TABLE "users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
-  END IF;
 END $$`,
+  ensureIdDefault("users"),
   `CREATE TABLE IF NOT EXISTS "projects" (
      "id" uuid NOT NULL DEFAULT gen_random_uuid(),
      "title" character varying(255) NOT NULL,
@@ -314,7 +301,72 @@ END $$`,
     "id",
     "FK_service_platforms_service",
   ),
+  ensureIdDefault("projects"),
+  ensureIdDefault("project_stats"),
+  ensureIdDefault("investment_requests"),
+  ensureIdDefault("services"),
+  ensureIdDefault("service_platforms"),
+  ensureIdDefault("investor_inquiries"),
+  ensureIdDefault("inquiry_throttles"),
 ];
+
+function ensureIdDefault(table: string) {
+  const name = sqlIdent(table);
+  return `DO $$
+DECLARE
+  id_type oid;
+  id_typmod integer;
+  id_len integer;
+  has_default boolean;
+  default_expr text;
+  max_id bigint;
+  seq_name text := '${name}_id_seq';
+BEGIN
+  IF to_regclass('${name}') IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT a.atttypid, a.atttypmod, a.atthasdef, pg_get_expr(d.adbin, d.adrelid)
+    INTO id_type, id_typmod, has_default, default_expr
+  FROM pg_attribute a
+  LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum
+  WHERE a.attrelid = '${name}'::regclass
+    AND a.attname = 'id'
+    AND a.attnum > 0
+    AND NOT a.attisdropped;
+
+  IF id_type IS NULL THEN
+    RETURN;
+  END IF;
+  IF has_default AND default_expr IS NOT NULL AND btrim(default_expr) <> 'NULL' THEN
+    RETURN;
+  END IF;
+
+  IF id_type = 'uuid'::regtype THEN
+    EXECUTE format('ALTER TABLE %s ALTER COLUMN id SET DEFAULT gen_random_uuid()', '${name}'::regclass);
+  ELSIF id_type IN ('text'::regtype, 'varchar'::regtype, 'bpchar'::regtype) THEN
+    id_len := CASE WHEN id_typmod > 0 THEN id_typmod - 4 ELSE NULL END;
+    IF id_len IS NOT NULL AND id_len < 36 THEN
+      EXECUTE format(
+        'ALTER TABLE %s ALTER COLUMN id SET DEFAULT left(replace(gen_random_uuid()::text, %L, %L), %s)',
+        '${name}'::regclass, '-', '', GREATEST(id_len, 1)
+      );
+    ELSE
+      EXECUTE format('ALTER TABLE %s ALTER COLUMN id SET DEFAULT gen_random_uuid()::text', '${name}'::regclass);
+    END IF;
+  ELSIF id_type IN ('int2'::regtype, 'int4'::regtype, 'int8'::regtype) THEN
+    EXECUTE format('CREATE SEQUENCE IF NOT EXISTS %I', seq_name);
+    EXECUTE format('SELECT MAX(id)::bigint FROM %s', '${name}'::regclass) INTO max_id;
+    PERFORM setval(seq_name, COALESCE(max_id, 1), max_id IS NOT NULL);
+    EXECUTE format('ALTER TABLE %s ALTER COLUMN id SET DEFAULT nextval(%L::regclass)', '${name}'::regclass, seq_name);
+    BEGIN
+      EXECUTE format('ALTER SEQUENCE %I OWNED BY %s.id', seq_name, '${name}'::regclass);
+    EXCEPTION WHEN OTHERS THEN
+      NULL;
+    END;
+  END IF;
+END $$`;
+}
 
 function sqlIdent(value: string) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
