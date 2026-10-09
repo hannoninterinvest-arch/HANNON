@@ -581,4 +581,15 @@ export async function applySchema(client: PoolClient) {
       throw new Error(message);
     }
   }
+  await client.query(`
+    ALTER TABLE projects ADD COLUMN IF NOT EXISTS "homeSlot" integer CHECK ("homeSlot" BETWEEN 1 AND 6);
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS "homeSlot" integer CHECK ("homeSlot" BETWEEN 1 AND 6);
+    CREATE UNIQUE INDEX IF NOT EXISTS projects_home_slot ON projects ("homeSlot") WHERE "homeSlot" IS NOT NULL;
+    CREATE UNIQUE INDEX IF NOT EXISTS services_home_slot ON services ("homeSlot") WHERE "homeSlot" IS NOT NULL;
+    ALTER TABLE investor_inquiries ADD COLUMN IF NOT EXISTS name varchar(180);
+    ALTER TABLE investor_inquiries ADD COLUMN IF NOT EXISTS phone varchar(64);
+    ALTER TABLE investor_inquiries ADD COLUMN IF NOT EXISTS "projectId" uuid;
+    ALTER TABLE investor_inquiries ADD COLUMN IF NOT EXISTS "projectTitle" text;
+  `);
+
 }

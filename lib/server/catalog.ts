@@ -71,7 +71,7 @@ async function platformsOf(serviceId: string) {
 
 export async function listPublishedServices() {
   const rows = await query(
-    `SELECT id, name, slug, description, "imageUrl", "sortOrder"
+    `SELECT id, name, slug, description, "imageUrl", "sortOrder", "homeSlot"
      FROM services WHERE status = 'published'
      ORDER BY "sortOrder" ASC, name ASC`,
   );
@@ -106,7 +106,7 @@ export async function listAdminServices() {
   }));
 }
 
-export async function getAdminService(id: string) {
+export async function getAdminService(id: string): Promise<Row> {
   if (!isUuid(id)) throw new HttpError(404, "Service introuvable");
   const service = await one(`SELECT * FROM services WHERE id = $1`, [id]);
   if (!service) throw new HttpError(404, "Service introuvable");

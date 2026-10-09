@@ -105,6 +105,7 @@ export default function AdminInquiriesPage() {
                 })}
               </span>
             </div>
+            {item.projectTitle && <p className="mt-3 text-sm">Projet : {item.projectTitle} · {item.name} · {item.phone}</p>}
             <p className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words text-sm leading-relaxed text-navy-800">
               {item.message}
             </p>

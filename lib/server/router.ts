@@ -22,7 +22,7 @@ import {
   updateService,
   uploadServiceImage,
 } from "./catalog";
-import { ensureReady } from "./db";
+import { one, query, ensureReady } from "./db";
 import { fail, HttpError, ok } from "./http";
 import { createInquiry, listInquiries, markInquiryHandled, removeInquiry } from "./inquiries";
 import { createInvestment, listInvestments, listMyInvestments, updateInvestmentStatus } from "./investments";
@@ -63,6 +63,25 @@ const routes: { method: string; pattern: string; auth: boolean; handle: Handler 
     handle: async (req, params) => updateInvestorStatus(params.id, await readJson(req)),
   },
 
+  ...(["projects", "services"] as const).map((table) => ({
+    method: "PATCH", pattern: `${table}/:id/home`, auth: true,
+    handle: async (req: NextRequest, params: Record<string, string>) => {
+      const body = await readJson(req);
+      const slot = body.homeSlot;
+      if (slot !== null && (typeof slot !== "number" || !Number.isInteger(slot) || slot < 1 || slot > 6)) {
+        throw new HttpError(400, "Choisissez une position de 1 à 6.");
+      }
+      const current = await one(`SELECT id FROM ${table} WHERE id::text = $1`, [params.id]);
+      if (!current) throw new HttpError(404, "Élément introuvable.");
+      try {
+        await query(`UPDATE ${table} SET "homeSlot" = $2 WHERE id::text = $1`, [params.id, slot]);
+      } catch (error) {
+        if ((error as { code?: string }).code === "23505") throw new HttpError(409, "Cette position est occupée. Retirez d'abord l'élément qui l'occupe.");
+        throw error;
+      }
+      return { ok: true };
+    },
+  })),
   { method: "GET", pattern: "projects", auth: false, handle: async () => listVisibleProjects() },
   { method: "GET", pattern: "projects/admin/all", auth: true, handle: async () => listAllProjects() },
   { method: "GET", pattern: "projects/admin/:id", auth: true, handle: async (_req, params) => getProject(params.id, false) },

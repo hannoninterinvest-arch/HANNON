@@ -42,8 +42,9 @@ export default function ProjectsSection() {
           </p>
         )}
 
+        {!error && !projects.some(p => p.homeSlot != null) && <p className="mb-4 text-sm text-muted-dark">Les projets sélectionnés par l’administrateur apparaîtront ici.</p>}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {projects.slice(0, 3).map((project) => (
+          {projects.filter(p => p.homeSlot != null).sort((a, b) => a.homeSlot! - b.homeSlot!).slice(0, 6).map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>

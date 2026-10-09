@@ -265,50 +265,19 @@ async function insertAdmin(client: PoolClient, email: string, password: string) 
 }
 
 async function ensureProjects(client: PoolClient) {
-  const count = await client.query(`SELECT COUNT(*)::int AS count FROM projects`);
-  if (Number(count.rows[0]?.count) > 0) return;
-  for (const sample of PROJECTS) {
-    const inserted = await client.query(
-      `INSERT INTO projects
-        (title, slug, description, summary, sector, location, "imageUrl",
-         "targetAmount", "raisedAmount", "minInvestment", "expectedReturn",
-         "durationMonths", status, visible, highlights)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'open',true,$13)
-       RETURNING id`,
-      [
-        sample.title,
-        sample.slug,
-        sample.description,
-        sample.summary,
-        sample.sector,
-        sample.location,
-        sample.imageUrl,
-        sample.targetAmount,
-        sample.raisedAmount,
-        sample.minInvestment,
-        sample.expectedReturn,
-        sample.durationMonths,
-        sample.highlights.join(","),
-      ],
-    );
-    const projectId = inserted.rows[0].id as string;
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
-    for (let i = 0; i < months.length; i += 1) {
-      const progress = (i + 1) / months.length;
-      await client.query(
-        `INSERT INTO project_stats
-          (label, "sortOrder", "capitalRaised", "investorsCount", "projectedReturn", "projectId")
-         VALUES ($1,$2,$3,$4,$5,$6)`,
-        [
-          `${months[i]} 2026`,
-          i,
-          Math.round(sample.raisedAmount * (0.35 + progress * 0.65)),
-          Math.max(2, Math.round(progress * 22)),
-          Number((sample.expectedReturn * (0.4 + progress * 0.6)).toFixed(2)),
-          projectId,
-        ],
-      );
+  await client.query(`CREATE TABLE IF NOT EXISTS hannon_migrations (name text PRIMARY KEY)`);
+  await client.query('BEGIN');
+  try {
+    const applied = await client.query(`INSERT INTO hannon_migrations (name) VALUES ('remove-default-projects-v1') ON CONFLICT DO NOTHING RETURNING name`);
+    if (applied.rows.length) {
+      for (const sample of PROJECTS) {
+        await client.query(`DELETE FROM projects WHERE slug = $1 AND title = $2 AND description = $3 AND "imageUrl" = $4 AND "cloudinaryPublicId" IS NULL`, [sample.slug, sample.title, sample.description, sample.imageUrl]);
+      }
     }
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
   }
 }
 
