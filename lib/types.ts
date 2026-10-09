@@ -41,6 +41,7 @@ export type Project = {
   durationMonths: number;
   status: ProjectStatus;
   visible: boolean;
+  homeSlot: number | null;
   highlights: string[] | null;
   stats: ProjectStat[];
   createdAt: string;
@@ -74,6 +75,7 @@ export type ServicePlatform = {
 };
 
 export type HannonService = {
+  homeSlot: number | null;
   id: string;
   name: string;
   slug: string;
@@ -86,6 +88,10 @@ export type HannonService = {
 };
 
 export type InvestorInquiry = {
+  name: string | null;
+  phone: string | null;
+  projectId: string | null;
+  projectTitle: string | null;
   id: string;
   email: string;
   type: InquiryType;

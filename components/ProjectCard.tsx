@@ -78,7 +78,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           href={`/projects/${project.id}`}
           className="mt-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[2px] text-navy-800 transition-colors hover:text-gold-500"
         >
-          View opportunity
+          En savoir plus
           <span aria-hidden>→</span>
         </Link>
       </div>

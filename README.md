@@ -106,3 +106,11 @@ Le schéma est appliqué au premier appel API : tables créées seulement si ell
 
 - Titres : **Cormorant Garamond**
 - Corps : **Jost**
+
+### Homepage selection and project enquiries
+
+In Admin → Projects / Services, assign positions 1–6 under “Position sur l’accueil”. Each position can contain one item; remove the previous selection before reusing an occupied position. Only visible projects and published services appear publicly. The full catalogues remain available at `/projects` and `/services`.
+
+Projects can be created, edited (including image, visibility and status), and deleted. “Je suis intéressé” submits name, email and phone with an optional message, without a customer account. Admin → Propositions et questions shows the project and contact details; existing spam protection is retained.
+
+The schema updates automatically on API startup. A one-time migration removes matching original demo projects; it does not recreate them after deletion. Projects with changed title, description, image or slug are preserved. Interest records retain a snapshot of the project title after deletion. Homepage positions start empty and must be assigned by the administrator.

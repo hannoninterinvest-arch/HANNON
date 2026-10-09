@@ -9,7 +9,7 @@ const MIN_GAP_MS = 20 * 1000;
 const DEDUPE_MS = 2 * 60 * 1000;
 const MIN_FILL_MS = 400;
 
-const PUBLIC_COLUMNS = `id, email, type, message, "receivedAt", status`;
+const PUBLIC_COLUMNS = `id, email, type, message, "receivedAt", status, name, phone, "projectId", "projectTitle"`;
 
 export async function createInquiry(body: Record<string, unknown>, ipHash: string) {
   await throttle(ipHash);
@@ -39,14 +39,28 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
   if (type !== "proposition" && type !== "question") {
     throw new HttpError(400, "Choisissez Proposition ou Question.");
   }
+  const projectId = body.projectId == null ? null : String(body.projectId);
+  let projectTitle: string | null = null;
+  let name: string | null = null;
+  let phone: string | null = null;
+  if (projectId !== null) {
+    if (!isUuid(projectId)) throw new HttpError(400, "Projet invalide.");
+    const project = await one(`SELECT title FROM projects WHERE id = $1 AND visible = true`, [projectId]);
+    if (!project) throw new HttpError(404, "Projet introuvable.");
+    projectTitle = String(project.title);
+    name = String(body.name ?? "").trim();
+    phone = String(body.phone ?? "").trim();
+    if (!name || name.length > 180) throw new HttpError(400, "Indiquez votre nom.");
+    if (phone.length > 64 || !/^[+0-9() .-]{6,64}$/.test(phone) || phone.replace(/\D/g, "").length < 6) throw new HttpError(400, "Indiquez un numéro de téléphone valide.");
+  }
   const message = String(body.message ?? "").trim();
-  if (message.length < 5) throw new HttpError(400, "Le message doit contenir au moins 5 caractères.");
+  if (projectId === null && message.length < 5) throw new HttpError(400, "Le message doit contenir au moins 5 caractères.");
   if (message.length > 5000) throw new HttpError(400, "Le message ne peut pas dépasser 5000 caractères.");
 
   const duplicate = await one(
     `SELECT id FROM investor_inquiries
-     WHERE email = $1 AND type = $2 AND message = $3 AND "receivedAt" > $4`,
-    [email, type, message, new Date(Date.now() - DEDUPE_MS)],
+     WHERE email = $1 AND type = $2 AND message = $3 AND "receivedAt" > $4 AND "projectId" IS NOT DISTINCT FROM $5::uuid`,
+    [email, type, message, new Date(Date.now() - DEDUPE_MS), projectId],
   );
   if (duplicate) return { ok: true as const };
 
@@ -70,8 +84,8 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
   }
 
   await query(
-    `INSERT INTO investor_inquiries (email, type, message, status, "ipHash") VALUES ($1,$2,$3,'nouveau',$4)`,
-    [email, type, message, ipHash],
+    `INSERT INTO investor_inquiries (email, type, message, status, "ipHash", name, phone, "projectId", "projectTitle") VALUES ($1,$2,$3,'nouveau',$4,$5,$6,$7,$8)`,
+    [email, type, message, ipHash, name, phone, projectId, projectTitle],
   );
   return { ok: true as const };
 }

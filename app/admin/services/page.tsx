@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import HomeSlot from "@/components/HomeSlot";
 import DashboardShell from "@/components/DashboardShell";
 import StatusBadge from "@/components/StatusBadge";
 import { api } from "@/lib/api";
@@ -89,6 +90,7 @@ export default function AdminServicesPage() {
                 />
               </label>
             </div>
+            <HomeSlot kind="services" id={service.id} value={service.homeSlot} onSaved={load} />
             <div className="mt-4 flex flex-wrap gap-4">
               <Link
                 href={`/admin/services/${service.id}`}

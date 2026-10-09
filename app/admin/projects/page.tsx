@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import HomeSlot from "@/components/HomeSlot";
 import DashboardShell from "@/components/DashboardShell";
 import StatusBadge from "@/components/StatusBadge";
 import { api, money } from "@/lib/api";
@@ -26,8 +27,8 @@ export default function AdminProjectsPage() {
 
   async function remove(id: string) {
     if (!confirm("Delete this project and its Cloudinary image?")) return;
-    await api(`/projects/${id}`, { method: "DELETE" });
-    load();
+    try { await api(`/projects/${id}`, { method: "DELETE" }); await load(); }
+    catch (e) { setError(e instanceof Error ? e.message : "Suppression impossible"); }
   }
 
   return (
@@ -66,7 +67,9 @@ export default function AdminProjectsPage() {
                 {project.sector} · {project.location} · {money(project.raisedAmount)} /{" "}
                 {money(project.targetAmount)}
               </p>
+              <HomeSlot kind="projects" id={project.id} value={project.homeSlot} onSaved={load} />
               <div className="mt-2 flex gap-3">
+                <Link href={`/admin/projects/${project.id}`} className="text-sm">Modifier</Link>
                 <Link
                   href={`/projects/${project.id}`}
                   className="text-[11px] uppercase tracking-[1.5px] text-navy-800 hover:text-gold-500"

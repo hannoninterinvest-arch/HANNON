@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import type { HannonService } from "@/lib/types";
 import ServiceCard from "./ServiceCard";
@@ -64,17 +65,18 @@ export default function Services() {
         </div>
 
         {error && <p className="mb-4 text-sm text-muted-dark">{error}</p>}
-        {!error && services.length === 0 && (
+        {!error && !services.some(s => s.homeSlot != null) && (
           <p className="text-sm font-light text-muted-dark">
-            Les services publiés apparaîtront ici.
+            Les services sélectionnés par l’administrateur apparaîtront ici.
           </p>
         )}
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map((service, i) => (
+          {services.filter(s => s.homeSlot != null).sort((a, b) => a.homeSlot! - b.homeSlot!).slice(0, 6).map((service, i) => (
             <ServiceCard key={service.id} service={service} index={i} />
           ))}
         </div>
+        <Link href="/services" className="btn btn-outline-navy mt-6">Tous les services</Link>
       </div>
     </section>
   );

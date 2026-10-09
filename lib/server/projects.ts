@@ -8,7 +8,7 @@ type Row = Record<string, unknown>;
 
 const PROJECT_COLUMNS = `id, title, slug, description, summary, sector, location, "imageUrl",
   "cloudinaryPublicId", "targetAmount", "raisedAmount", "minInvestment", "expectedReturn",
-  "durationMonths", status, visible, highlights, "createdAt", "updatedAt"`;
+  "durationMonths", status, visible, "homeSlot", highlights, "createdAt", "updatedAt"`;
 
 function highlightsOf(value: unknown) {
   if (value == null || value === "") return value == null ? null : [];
@@ -18,7 +18,7 @@ function highlightsOf(value: unknown) {
     .filter(Boolean);
 }
 
-function shapeProject(row: Row, stats: Row[]) {
+function shapeProject(row: Row, stats: Row[]): Row & { highlights: string[] | null; stats: Row[] } {
   return {
     ...row,
     highlights: highlightsOf(row.highlights),
