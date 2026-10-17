@@ -24,6 +24,12 @@ export type ProjectStat = {
   projectedReturn: string | number;
 };
 
+export type RiskLevel = "low" | "medium" | "high";
+export type Allocation = { label: string; percent: number };
+export type TicketTier = { label: string; amount: number; note: string };
+export type MilestoneStatus = "done" | "active" | "upcoming";
+export type Milestone = { label: string; date: string; status: MilestoneStatus };
+
 export type Project = {
   id: string;
   title: string;
@@ -43,6 +49,19 @@ export type Project = {
   visible: boolean;
   highlights: string[] | null;
   presentationUrl: string | null;
+  riskLevel: RiskLevel | null;
+  instrument: string | null;
+  maxInvestment: string | number | null;
+  ticketStep: string | number | null;
+  closingDate: string | null;
+  payoutFrequency: string | null;
+  exitStrategy: string | null;
+  securityGuarantees: string | null;
+  useOfProceeds: Allocation[];
+  capitalStructure: Allocation[];
+  ticketTiers: TicketTier[];
+  milestones: Milestone[];
+  risks: string[];
   stats: ProjectStat[];
   createdAt: string;
 };
@@ -101,6 +120,14 @@ export type InvestorInquiry = {
   budget: string | number | null;
   projectId: string | null;
   projectTitle: string | null;
+  jobTitle: string | null;
+  country: string | null;
+  investorType: string | null;
+  websiteUrl: string | null;
+  preferredContact: string | null;
+  horizon: string | null;
+  activities: string | null;
+  ticketTier: string | null;
   attachments: InquiryAttachment[];
   type: InquiryType;
   message: string;

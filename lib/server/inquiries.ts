@@ -17,7 +17,32 @@ const DEDUPE_MS = 2 * 60 * 1000;
 const MIN_FILL_MS = 400;
 
 const PUBLIC_COLUMNS = `id, email, name, phone, company, budget, "projectId", "projectTitle",
-  attachments, type, message, "receivedAt", status`;
+  "jobTitle", country, "investorType", "websiteUrl", "preferredContact", horizon, activities,
+  "ticketTier", attachments, type, message, "receivedAt", status`;
+
+const INVESTOR_TYPES = ["individual", "family_office", "fund", "corporate", "institution", "other"];
+const CONTACT_METHODS = ["email", "phone", "whatsapp"];
+const HORIZONS = ["Under 1 year", "1 to 3 years", "3 to 5 years", "More than 5 years"];
+
+function choice(value: unknown, allowed: string[], label: string) {
+  if (value == null || String(value).trim() === "") return null;
+  const text = String(value).trim();
+  if (!allowed.includes(text)) throw new HttpError(400, `${label} is invalid.`);
+  return text;
+}
+
+function optionalUrl(value: unknown) {
+  const text = optionalText(value, 300, "The website");
+  if (!text) return null;
+  const candidate = /^https?:\/\//i.test(text) ? text : `https://${text}`;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error("protocol");
+    return candidate;
+  } catch {
+    throw new HttpError(400, "Please enter a valid website or LinkedIn address.");
+  }
+}
 const MAX_BUDGET = 1e13;
 
 function optionalText(value: unknown, max: number, label: string) {
@@ -75,6 +100,14 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
     throw new HttpError(400, "Please enter a valid phone number.");
   }
   const company = optionalText(body.company, 200, "The company name");
+  const jobTitle = optionalText(body.jobTitle, 120, "The job title");
+  const country = optionalText(body.country, 100, "The country");
+  const investorType = choice(body.investorType, INVESTOR_TYPES, "The investor type");
+  const websiteUrl = optionalUrl(body.websiteUrl);
+  const preferredContact = choice(body.preferredContact, CONTACT_METHODS, "The preferred contact method");
+  const horizon = choice(body.horizon, HORIZONS, "The investment horizon");
+  const activities = optionalText(body.activities, 3000, "The activity description");
+  const ticketTier = optionalText(body.ticketTier, 80, "The ticket tier");
 
   let budget: number | null = null;
   if (body.budget != null && String(body.budget).trim() !== "") {
@@ -101,13 +134,19 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
   checkAttachments(files);
 
   const message = String(body.message ?? "").trim();
-  if (message.length < 5) throw new HttpError(400, "The message must contain at least 5 characters.");
+  if (message.length === 0 && type !== "interest") {
+    throw new HttpError(400, "Please write a message.");
+  }
+  if (message.length > 0 && message.length < 5) {
+    throw new HttpError(400, "The message must contain at least 5 characters.");
+  }
   if (message.length > 5000) throw new HttpError(400, "The message cannot exceed 5000 characters.");
 
   const duplicate = await one(
     `SELECT id FROM investor_inquiries
-     WHERE email = $1 AND type = $2 AND message = $3 AND "receivedAt" > $4`,
-    [email, type, message, new Date(Date.now() - DEDUPE_MS)],
+     WHERE email = $1 AND type = $2 AND message = $3 AND "receivedAt" > $4
+       AND budget IS NOT DISTINCT FROM $5::numeric`,
+    [email, type, message, new Date(Date.now() - DEDUPE_MS), budget],
   );
   if (duplicate) return { ok: true as const };
 
@@ -134,9 +173,14 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
   try {
     await query(
       `INSERT INTO investor_inquiries
-        (email, name, phone, company, budget, "projectId", "projectTitle", attachments, type, message, status, "ipHash")
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,'nouveau',$11)`,
-      [email, name, phone, company, budget, projectId, projectTitle, JSON.stringify(attachments), type, message, ipHash],
+        (email, name, phone, company, budget, "projectId", "projectTitle", attachments, type, message,
+         status, "ipHash", "jobTitle", country, "investorType", "websiteUrl", "preferredContact",
+         horizon, activities, "ticketTier")
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,'nouveau',$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+      [
+        email, name, phone, company, budget, projectId, projectTitle, JSON.stringify(attachments), type, message,
+        ipHash, jobTitle, country, investorType, websiteUrl, preferredContact, horizon, activities, ticketTier,
+      ],
     );
   } catch (error) {
     await destroyAttachments(attachments);

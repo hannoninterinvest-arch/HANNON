@@ -2,13 +2,14 @@ import { getPool, one, query } from "./db";
 import { has, HttpError, isUuid } from "./http";
 import { destroyImage, normalizeDriveLink, normalizePublicId, readImage, uploadBuffer } from "./media";
 import { slugify } from "./slug";
+import { DETAIL_COLUMNS, DETAIL_SELECT, detailAssignments, detailParams, detailPlaceholders, readDetails } from "./projectDetails";
 import type { NextRequest } from "next/server";
 
 type Row = Record<string, unknown>;
 
 const PROJECT_COLUMNS = `id, title, slug, description, summary, sector, location, "imageUrl",
   "cloudinaryPublicId", "targetAmount", "raisedAmount", "minInvestment", "expectedReturn",
-  "durationMonths", status, visible, highlights, "presentationUrl", "createdAt", "updatedAt"`;
+  "durationMonths", status, visible, highlights, "presentationUrl", ${DETAIL_SELECT}, "createdAt", "updatedAt"`;
 
 function highlightsOf(value: unknown) {
   if (value == null || value === "") return value == null ? null : [];
@@ -158,12 +159,14 @@ export async function createProject(body: Record<string, unknown>) {
   const expectedReturn = requireNumber(body, "expectedReturn", Number.NEGATIVE_INFINITY);
   const imageUrl = body.imageUrl == null || body.imageUrl === "" ? null : String(body.imageUrl);
   const cloudinaryPublicId = normalizePublicId(body.cloudinaryPublicId, 255);
+  const minInvestment = requireNumber(body, "minInvestment");
+  const details = readDetails(body, undefined, minInvestment);
   const inserted = await one(
     `INSERT INTO projects
       (title, slug, description, summary, sector, location, "imageUrl", "cloudinaryPublicId",
        "targetAmount", "raisedAmount", "minInvestment", "expectedReturn", "durationMonths",
-       status, visible, highlights, "presentationUrl")
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+       status, visible, highlights, "presentationUrl", ${DETAIL_COLUMNS.map((c) => `"${c}"`).join(", ")})
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17, ${detailPlaceholders(18).join(", ")})
      RETURNING id`,
     [
       title,
@@ -176,13 +179,14 @@ export async function createProject(body: Record<string, unknown>) {
       cloudinaryPublicId,
       requireNumber(body, "targetAmount"),
       raisedAmount,
-      requireNumber(body, "minInvestment"),
+      minInvestment,
       expectedReturn,
       Math.round(requireNumber(body, "durationMonths")),
       optionalStatus(body.status, "open"),
       body.visible === undefined ? true : Boolean(body.visible),
       highlightsText(body.highlights),
       normalizeDriveLink(body.presentationUrl),
+      ...detailParams(details),
     ],
   );
   const stats = Array.isArray(body.stats) && body.stats.length
@@ -229,6 +233,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       ? normalizeDriveLink(body.presentationUrl)
       : current.presentationUrl,
   };
+  const details = readDetails(body, current, Number(next.minInvestment));
   if (has(body, "slug") && next.slug !== current.slug) {
     const clash = await one(`SELECT id FROM projects WHERE slug = $1 AND id <> $2`, [next.slug, id]);
     if (clash) throw new HttpError(400, "A project with this slug already exists");
@@ -239,7 +244,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       "imageUrl" = $8, "cloudinaryPublicId" = $9, "targetAmount" = $10, "raisedAmount" = $11,
       "minInvestment" = $12, "expectedReturn" = $13, "durationMonths" = $14, status = $15,
       visible = $16, highlights = CASE WHEN $17 THEN $18 ELSE highlights END,
-      "presentationUrl" = $19, "updatedAt" = now()
+      "presentationUrl" = $19, ${detailAssignments(20).join(", ")}, "updatedAt" = now()
      WHERE id = $1`,
     [
       id,
@@ -261,6 +266,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       has(body, "highlights"),
       next.highlights,
       next.presentationUrl,
+      ...detailParams(details),
     ],
   );
   if (has(body, "stats")) {
