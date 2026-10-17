@@ -12,7 +12,7 @@ export default function InvestorDashboardPage() {
 
   return (
     <main className="bg-ivory px-6 py-20 text-center text-sm text-muted-dark">
-      Redirection vers le formulaire de contact…
+      Redirecting to the contact form…
     </main>
   );
 }

@@ -31,7 +31,7 @@ export default function AdminHomePage() {
         {[
           ["Projects", projects.length, "/admin/projects"],
           ["Services", services.length, "/admin/services"],
-          ["Propositions et questions", newInquiries, "/admin/inquiries"],
+          ["Proposals & questions", newInquiries, "/admin/inquiries"],
           ["Investors", investors.length, "/admin/investors"],
           ["Pending investors", pendingInvestors, "/admin/investors"],
           ["Pending requests", pendingRequests, "/admin/requests"],

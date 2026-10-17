@@ -19,11 +19,11 @@ export default function StatusBadge({
     question: "bg-[#e7eef8] text-[#1d3d6e]",
   };
   const labels: Record<string, string> = {
-    draft: "Brouillon",
-    published: "Publié",
-    nouveau: "Nouveau",
-    "traité": "Traité",
-    proposition: "Proposition",
+    draft: "Draft",
+    published: "Published",
+    nouveau: "New",
+    "traité": "Handled",
+    proposition: "Proposal",
     question: "Question",
   };
   return (

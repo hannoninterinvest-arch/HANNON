@@ -130,7 +130,7 @@ async function removeDemoAccounts(client: PoolClient) {
 
 function quoteIdent(name: string) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
-    throw new Error(`Identifiant SQL refusé: ${name}`);
+    throw new Error(`Rejected SQL identifier: ${name}`);
   }
   return `"${name}"`;
 }

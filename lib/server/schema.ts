@@ -439,7 +439,7 @@ END $$`;
 
 function sqlIdent(value: string) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
-    throw new Error(`Identifiant SQL refusé: ${value}`);
+    throw new Error(`Rejected SQL identifier: ${value}`);
   }
   return value;
 }
@@ -577,7 +577,7 @@ export async function applySchema(client: PoolClient) {
     try {
       await client.query(statement);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "erreur SQL";
+      const message = error instanceof Error ? error.message : "SQL error";
       throw new Error(message);
     }
   }

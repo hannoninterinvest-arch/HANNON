@@ -19,15 +19,15 @@ export default function CtaBand() {
             Ready to structure your <span className="gold-text">next transaction?</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-[15px] font-light leading-[1.8] text-muted">
-            Envoyez-nous votre proposition ou votre question. Notre équipe vous répond à
-            l&apos;adresse e-mail indiquée.
+            Send us your proposal or your question. Our team will reply to the email
+            address you provide.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
             <Link href="/contact" className="btn btn-gold w-full sm:w-auto">
-              Envoyer une proposition <span aria-hidden>→</span>
+              Send a proposal <span aria-hidden>→</span>
             </Link>
             <Link href="/services" className="btn btn-outline w-full sm:w-auto">
-              Découvrir nos services
+              Discover our services
             </Link>
           </div>
         </Reveal>

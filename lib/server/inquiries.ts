@@ -15,33 +15,33 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
   await throttle(ipHash);
   const website = body.website;
   if (website != null && typeof website !== "string") {
-    throw new HttpError(400, "Requête invalide.");
+    throw new HttpError(400, "Invalid request.");
   }
   if (typeof website === "string" && website.length > 200) {
-    throw new HttpError(400, "Requête invalide.");
+    throw new HttpError(400, "Invalid request.");
   }
   if (typeof website === "string" && website.trim()) return { ok: true as const };
 
   if (body.startedAt != null && body.startedAt !== "") {
     const startedAt = Number(body.startedAt);
-    if (!Number.isFinite(startedAt)) throw new HttpError(400, "Requête invalide.");
+    if (!Number.isFinite(startedAt)) throw new HttpError(400, "Invalid request.");
     const elapsed = Date.now() - startedAt;
     if (elapsed >= 0 && elapsed < MIN_FILL_MS) {
-      throw new HttpError(400, "Veuillez patienter un instant avant d'envoyer le formulaire.");
+      throw new HttpError(400, "Please wait a moment before submitting the form.");
     }
   }
 
   const email = String(body.email ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
-    throw new HttpError(400, "Indiquez une adresse e-mail valide.");
+    throw new HttpError(400, "Please enter a valid email address.");
   }
   const type = body.type;
   if (type !== "proposition" && type !== "question") {
-    throw new HttpError(400, "Choisissez Proposition ou Question.");
+    throw new HttpError(400, "Please choose Proposal or Question.");
   }
   const message = String(body.message ?? "").trim();
-  if (message.length < 5) throw new HttpError(400, "Le message doit contenir au moins 5 caractères.");
-  if (message.length > 5000) throw new HttpError(400, "Le message ne peut pas dépasser 5000 caractères.");
+  if (message.length < 5) throw new HttpError(400, "The message must contain at least 5 characters.");
+  if (message.length > 5000) throw new HttpError(400, "The message cannot exceed 5000 characters.");
 
   const duplicate = await one(
     `SELECT id FROM investor_inquiries
@@ -57,7 +57,7 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
   if (Number(recent?.count) > 0) {
     throw new HttpError(
       429,
-      "Un message vient d'être envoyé avec cette adresse. Patientez quelques secondes.",
+      "A message was just sent from this address. Please wait a few seconds.",
     );
   }
 
@@ -66,7 +66,7 @@ export async function createInquiry(body: Record<string, unknown>, ipHash: strin
     [email, new Date(Date.now() - DAY)],
   );
   if (Number(today?.count) >= EMAIL_LIMIT_PER_DAY) {
-    throw new HttpError(429, "Trop de messages ont été envoyés avec cette adresse. Réessayez plus tard.");
+    throw new HttpError(429, "Too many messages were sent from this address. Please try again later.");
   }
 
   await query(
@@ -101,23 +101,23 @@ export async function listInquiries(type?: string | null, status?: string | null
 }
 
 export async function markInquiryHandled(id: string, body: Record<string, unknown>) {
-  if (!isUuid(id)) throw new HttpError(404, "Demande introuvable");
+  if (!isUuid(id)) throw new HttpError(404, "Request not found");
   if (body.status !== "traité") {
-    throw new HttpError(400, "Le statut ne peut être marqué que comme traité.");
+    throw new HttpError(400, "The status can only be set to handled.");
   }
   const inquiry = await one(
     `UPDATE investor_inquiries SET status = 'traité' WHERE id = $1
      RETURNING ${PUBLIC_COLUMNS}`,
     [id],
   );
-  if (!inquiry) throw new HttpError(404, "Demande introuvable");
+  if (!inquiry) throw new HttpError(404, "Request not found");
   return inquiry;
 }
 
 export async function removeInquiry(id: string) {
-  if (!isUuid(id)) throw new HttpError(404, "Demande introuvable");
+  if (!isUuid(id)) throw new HttpError(404, "Request not found");
   const existing = await one(`SELECT id FROM investor_inquiries WHERE id = $1`, [id]);
-  if (!existing) throw new HttpError(404, "Demande introuvable");
+  if (!existing) throw new HttpError(404, "Request not found");
   await query(`DELETE FROM investor_inquiries WHERE id = $1`, [id]);
   return { deleted: true };
 }
@@ -129,7 +129,7 @@ async function throttle(ipHash: string) {
     [ipHash, new Date(Date.now() - HOUR)],
   );
   if (Number(recent?.count) >= IP_LIMIT_PER_HOUR) {
-    throw new HttpError(429, "Trop de messages ont été envoyés. Réessayez plus tard.");
+    throw new HttpError(429, "Too many messages were sent. Please try again later.");
   }
   await query(`INSERT INTO inquiry_throttles ("ipHash") VALUES ($1)`, [ipHash]);
 }

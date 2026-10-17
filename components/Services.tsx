@@ -13,7 +13,7 @@ export default function Services() {
   useEffect(() => {
     api<HannonService[]>("/services")
       .then(setServices)
-      .catch(() => setError("Les services seront affichés dès que l'API est disponible."));
+      .catch(() => setError("Services will be displayed as soon as the API is available."));
   }, []);
 
   return (
@@ -38,7 +38,7 @@ export default function Services() {
         {error && <p className="mb-4 text-sm text-muted-dark">{error}</p>}
         {!error && services.length === 0 && (
           <p className="rounded-2xl border border-dashed border-gold-500/40 bg-ivory px-6 py-10 text-center text-sm font-light text-muted-dark">
-            Les services publiés apparaîtront ici.
+            Published services will appear here.
           </p>
         )}
 

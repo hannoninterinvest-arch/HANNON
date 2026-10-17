@@ -9,8 +9,8 @@ const QUICK_LINKS = [
 ];
 
 const SERVICE_LINKS = [
-  { href: "/services", label: "Tous les services" },
-  { href: "/contact", label: "Envoyer une proposition" },
+  { href: "/services", label: "All services" },
+  { href: "/contact", label: "Send a proposal" },
 ];
 
 const iconProps = {
@@ -162,7 +162,7 @@ export default function Footer() {
               </svg>
             }
           >
-            <span>Immeuble Saadi, Tour EF, Menzah 4, Tunis 1082 - Tunisie</span>
+            <span>Immeuble Saadi, Tour EF, Menzah 4, Tunis 1082 - Tunisia</span>
           </ContactRow>
         </div>
       </div>

@@ -33,7 +33,7 @@ export function publicUser(user: UserRow | Record<string, unknown>) {
 export async function register() {
   throw new HttpError(
     403,
-    "La création de comptes investisseurs est désactivée. Envoyez votre proposition ou votre question via le formulaire de contact.",
+    "Investor account creation is disabled. Please send your proposal or question through the contact form.",
   );
 }
 
@@ -59,7 +59,7 @@ export async function login(body: Record<string, unknown>) {
   if (user.role !== "admin") {
     throw new HttpError(
       401,
-      "La connexion réservée aux investisseurs n'est plus disponible. Envoyez votre proposition ou votre question via le formulaire de contact.",
+      "Investor sign-in is no longer available. Please send your proposal or question through the contact form.",
     );
   }
   const payload = { sub: user.id, email: user.email, role: user.role };
@@ -91,7 +91,7 @@ export async function requireAdmin(req: NextRequest) {
   );
   if (!user) throw new HttpError(401, "Unauthorized");
   if (user.role !== "admin") {
-    throw new HttpError(401, "La connexion réservée aux investisseurs n'est plus disponible.");
+    throw new HttpError(401, "Investor sign-in is no longer available.");
   }
   return user;
 }
@@ -103,7 +103,7 @@ export async function listInvestors() {
 }
 
 export async function updateInvestorStatus(id: string, body: Record<string, unknown>) {
-  if (!isUuid(id)) throw new HttpError(400, "Identifiant invalide.");
+  if (!isUuid(id)) throw new HttpError(400, "Invalid identifier.");
   const status = body.status;
   if (status !== "pending" && status !== "approved" && status !== "rejected") {
     throw new HttpError(400, "Statut invalide.");

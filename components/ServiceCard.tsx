@@ -63,7 +63,7 @@ export default function ServiceCard({
             </p>
           ) : null}
           <span className="mt-auto flex items-center gap-2 pt-5 text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
-            Découvrir
+            Discover
             <span
               aria-hidden
               className="inline-block transition-transform duration-300 group-hover:translate-x-1.5"

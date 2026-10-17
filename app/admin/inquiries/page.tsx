@@ -21,7 +21,7 @@ export default function AdminInquiriesPage() {
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e instanceof Error ? e.message : "Impossible de charger les demandes"));
+    load().catch((e) => setError(e instanceof Error ? e.message : "Unable to load requests"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -45,12 +45,12 @@ export default function AdminInquiriesPage() {
       });
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Mise à jour impossible");
+      setError(e instanceof Error ? e.message : "Update failed");
     }
   }
 
   async function remove(item: InvestorInquiry) {
-    if (!confirm(`Supprimer le message de ${item.email} ? Cette action est définitive.`)) return;
+    if (!confirm(`Delete the message from ${item.email}? This action cannot be undone.`)) return;
     setError("");
     try {
       await api(`/inquiries/${item.id}`, { method: "DELETE" });
@@ -70,21 +70,21 @@ export default function AdminInquiriesPage() {
             onChange={(e) => applyFilters(e.target.value as "" | InquiryType, status)}
             className="mt-1.5 block rounded-[3px] border border-[#e4dfd4] bg-white px-3 py-2 text-sm normal-case tracking-normal"
           >
-            <option value="">Tous</option>
-            <option value="proposition">Proposition</option>
+            <option value="">All</option>
+            <option value="proposition">Proposal</option>
             <option value="question">Question</option>
           </select>
         </label>
         <label className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-          Statut
+          Status
           <select
             value={status}
             onChange={(e) => applyFilters(type, e.target.value as "" | InquiryStatus)}
             className="mt-1.5 block rounded-[3px] border border-[#e4dfd4] bg-white px-3 py-2 text-sm normal-case tracking-normal"
           >
-            <option value="">Tous</option>
-            <option value="nouveau">Nouveau</option>
-            <option value="traité">Traité</option>
+            <option value="">All</option>
+            <option value="nouveau">New</option>
+            <option value="traité">Handled</option>
           </select>
         </label>
       </div>
@@ -99,7 +99,7 @@ export default function AdminInquiriesPage() {
               <StatusBadge status={item.type} />
               <StatusBadge status={item.status} />
               <span className="text-xs text-muted-dark">
-                {new Date(item.receivedAt).toLocaleString("fr-FR", {
+                {new Date(item.receivedAt).toLocaleString("en-GB", {
                   dateStyle: "medium",
                   timeStyle: "short",
                 })}
@@ -114,20 +114,20 @@ export default function AdminInquiriesPage() {
                   onClick={() => markHandled(item.id)}
                   className="text-[11px] uppercase tracking-[1.5px] text-[#1f6b3a]"
                 >
-                  Marquer comme traitée
+                  Mark as handled
                 </button>
               )}
               <button
                 onClick={() => remove(item)}
                 className="text-[11px] uppercase tracking-[1.5px] text-[#8a2a2a]"
               >
-                Supprimer
+                Delete
               </button>
             </div>
           </article>
         ))}
         {!items.length && !error && (
-          <p className="text-sm text-muted-dark">Aucune demande pour ce filtre.</p>
+          <p className="text-sm text-muted-dark">No requests match this filter.</p>
         )}
       </div>
     </DashboardShell>

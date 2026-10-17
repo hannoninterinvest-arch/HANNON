@@ -22,14 +22,14 @@ function publishStatus(value: unknown, fallback = "draft") {
 function sortOrder(value: unknown) {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 0 || number > 10000) {
-    throw new HttpError(400, "L'ordre d'affichage est invalide.");
+    throw new HttpError(400, "The display order is invalid.");
   }
   return number;
 }
 
-function assertPublishable(status: string, name: string, subject = "ce service") {
+function assertPublishable(status: string, name: string, subject = "this service") {
   if (status === "published" && !name.trim()) {
-    throw new HttpError(400, `Indiquez un nom avant de publier ${subject}.`);
+    throw new HttpError(400, `Enter a name before publishing ${subject}.`);
   }
 }
 
@@ -80,7 +80,7 @@ export async function listPublishedServices() {
 
 export async function publishedBySlug(slug: string) {
   const service = await one(`SELECT * FROM services WHERE slug = $1 AND status = 'published'`, [slug]);
-  if (!service) throw new HttpError(404, "Service introuvable");
+  if (!service) throw new HttpError(404, "Service not found");
   const platforms = (await platformsOf(String(service.id)))
     .filter((platform) => platform.status === "published")
     .map(publicPlatform);
@@ -107,9 +107,9 @@ export async function listAdminServices() {
 }
 
 export async function getAdminService(id: string) {
-  if (!isUuid(id)) throw new HttpError(404, "Service introuvable");
+  if (!isUuid(id)) throw new HttpError(404, "Service not found");
   const service = await one(`SELECT * FROM services WHERE id = $1`, [id]);
-  if (!service) throw new HttpError(404, "Service introuvable");
+  if (!service) throw new HttpError(404, "Service not found");
   return {
     ...service,
     platforms: (await platformsOf(id)).map(adminPlatform),
@@ -132,9 +132,9 @@ async function uniqueSlug(base: string) {
 
 export async function createService(body: Record<string, unknown>) {
   const name = String(body.name ?? "").trim();
-  if (!name || name.length > 180) throw new HttpError(400, "Le nom du service est obligatoire.");
+  if (!name || name.length > 180) throw new HttpError(400, "The service name is required.");
   const description = String(body.description ?? "").trim();
-  if (description.length > 8000) throw new HttpError(400, "La description est trop longue.");
+  if (description.length > 8000) throw new HttpError(400, "The description is too long.");
   const status = publishStatus(body.status);
   assertPublishable(status, name);
   const order = has(body, "sortOrder") ? sortOrder(body.sortOrder) : await nextSortOrder();
@@ -159,9 +159,9 @@ export async function createService(body: Record<string, unknown>) {
 export async function updateService(id: string, body: Record<string, unknown>) {
   const service = await getAdminService(id);
   const name = has(body, "name") ? String(body.name ?? "").trim() : service.name;
-  if (!name || name.length > 180) throw new HttpError(400, "Le nom du service est obligatoire.");
+  if (!name || name.length > 180) throw new HttpError(400, "The service name is required.");
   const description = has(body, "description") ? String(body.description ?? "").trim() : service.description;
-  if (description.length > 8000) throw new HttpError(400, "La description est trop longue.");
+  if (description.length > 8000) throw new HttpError(400, "The description is too long.");
   const status = has(body, "status") ? publishStatus(body.status) : service.status;
   const order = has(body, "sortOrder") ? sortOrder(body.sortOrder) : service.sortOrder;
   assertPublishable(status, name);
@@ -201,23 +201,23 @@ export async function uploadServiceImage(req: NextRequest) {
 }
 
 async function findPlatform(serviceId: string, platformId: string) {
-  if (!isUuid(serviceId) || !isUuid(platformId)) throw new HttpError(404, "Plateforme introuvable");
+  if (!isUuid(serviceId) || !isUuid(platformId)) throw new HttpError(404, "Platform not found");
   const platform = await one(
     `SELECT * FROM service_platforms WHERE id = $1 AND "serviceId" = $2`,
     [platformId, serviceId],
   );
-  if (!platform) throw new HttpError(404, "Plateforme introuvable");
+  if (!platform) throw new HttpError(404, "Platform not found");
   return platform;
 }
 
 export async function addPlatform(serviceId: string, body: Record<string, unknown>) {
   const service = await getAdminService(serviceId);
   const name = String(body.name ?? "").trim();
-  if (name.length > 180) throw new HttpError(400, "Le nom de la plateforme est trop long.");
+  if (name.length > 180) throw new HttpError(400, "The platform name is too long.");
   const description = String(body.description ?? "").trim();
-  if (description.length > 8000) throw new HttpError(400, "La description est trop longue.");
+  if (description.length > 8000) throw new HttpError(400, "The description is too long.");
   const status = publishStatus(body.status);
-  assertPublishable(status, name, "cette plateforme");
+  assertPublishable(status, name, "this platform");
   const order = has(body, "sortOrder")
     ? sortOrder(body.sortOrder)
     : (service.platforms || []).reduce((max: number, item: Row) => Math.max(max, Number(item.sortOrder)), -1) + 1;
@@ -260,12 +260,12 @@ async function assignImage(
 export async function updatePlatform(serviceId: string, platformId: string, body: Record<string, unknown>) {
   const platform = await findPlatform(serviceId, platformId);
   const name = has(body, "name") ? String(body.name ?? "").trim() : platform.name;
-  if (name.length > 180) throw new HttpError(400, "Le nom de la plateforme est trop long.");
+  if (name.length > 180) throw new HttpError(400, "The platform name is too long.");
   const description = has(body, "description") ? String(body.description ?? "").trim() : platform.description;
-  if (description.length > 8000) throw new HttpError(400, "La description est trop longue.");
+  if (description.length > 8000) throw new HttpError(400, "The description is too long.");
   const status = has(body, "status") ? publishStatus(body.status) : platform.status;
   const order = has(body, "sortOrder") ? sortOrder(body.sortOrder) : platform.sortOrder;
-  assertPublishable(status, name, "cette plateforme");
+  assertPublishable(status, name, "this platform");
   const link = has(body, "link") ? normalizeLink(body.link) : platform.link;
   const first = await assignImage(platform.imageUrl, platform.imagePublicId, body, "imageUrl", "imagePublicId");
   const second = await assignImage(

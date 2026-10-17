@@ -21,7 +21,7 @@ export default function LoginPage() {
       if (user.role !== "admin") {
         logout();
         setError(
-          "La connexion réservée aux investisseurs n'est plus disponible. Utilisez le formulaire de contact.",
+          "Investor sign-in is no longer available. Please use the contact form.",
         );
         return;
       }
@@ -47,7 +47,7 @@ export default function LoginPage() {
         <div className="eyebrow">Administration</div>
         <h1 className="mt-3 font-serif text-4xl font-semibold text-navy-900">Sign in</h1>
         <p className="mt-2 text-sm text-muted-dark">
-          Accès réservé aux administrateurs HANNON.
+          Access is reserved for HANNON administrators.
         </p>
         {error && (
           <p className="mt-4 rounded-xl bg-[#f8e4e4] px-4 py-3 text-sm text-[#8a2a2a]">

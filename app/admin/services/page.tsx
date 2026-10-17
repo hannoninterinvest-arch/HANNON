@@ -16,7 +16,7 @@ export default function AdminServicesPage() {
       setServices(await api<HannonService[]>("/services/admin/all"));
       setError("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Impossible de charger les services");
+      setError(e instanceof Error ? e.message : "Unable to load services");
     }
   }
 
@@ -33,12 +33,12 @@ export default function AdminServicesPage() {
       });
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Mise à jour impossible");
+      setError(e instanceof Error ? e.message : "Update failed");
     }
   }
 
   async function remove(service: HannonService) {
-    if (!confirm(`Supprimer « ${service.name} » et ses plateformes ? Cette action est définitive.`)) {
+    if (!confirm(`Delete “${service.name}” and its platforms? This action cannot be undone.`)) {
       return;
     }
     setError("");
@@ -46,7 +46,7 @@ export default function AdminServicesPage() {
       await api(`/services/${service.id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Suppression impossible");
+      setError(e instanceof Error ? e.message : "Deletion failed");
     }
   }
 
@@ -54,7 +54,7 @@ export default function AdminServicesPage() {
     <DashboardShell title="Services">
       <div className="mb-6 flex justify-end">
         <Link href="/admin/services/new" className="btn btn-gold">
-          Nouveau service
+          New service
         </Link>
       </div>
       {error && <p className="mb-4 text-sm text-[#8a2a2a]">{error}</p>}
@@ -74,7 +74,7 @@ export default function AdminServicesPage() {
                 </p>
               </div>
               <label className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-                Ordre
+                Order
                 <input
                   type="number"
                   min={0}
@@ -94,7 +94,7 @@ export default function AdminServicesPage() {
                 href={`/admin/services/${service.id}`}
                 className="text-[11px] uppercase tracking-[1.5px] text-navy-800 hover:text-gold-500"
               >
-                Modifier
+                Edit
               </Link>
               <button
                 onClick={() =>
@@ -104,27 +104,27 @@ export default function AdminServicesPage() {
                 }
                 className="text-[11px] uppercase tracking-[1.5px] text-[#1f6b3a]"
               >
-                {service.status === "published" ? "Dépublier" : "Publier"}
+                {service.status === "published" ? "Unpublish" : "Publish"}
               </button>
               {service.status === "published" && (
                 <Link
                   href={`/services/${service.slug}`}
                   className="text-[11px] uppercase tracking-[1.5px] text-navy-800 hover:text-gold-500"
                 >
-                  Voir la page
+                  View page
                 </Link>
               )}
               <button
                 onClick={() => remove(service)}
                 className="text-[11px] uppercase tracking-[1.5px] text-[#8a2a2a]"
               >
-                Supprimer
+                Delete
               </button>
             </div>
           </article>
         ))}
         {!services.length && !error && (
-          <p className="text-sm text-muted-dark">Aucun service enregistré.</p>
+          <p className="text-sm text-muted-dark">No services yet.</p>
         )}
       </div>
     </DashboardShell>

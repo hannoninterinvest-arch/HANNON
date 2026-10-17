@@ -27,7 +27,7 @@ export default function NewServicePage() {
       setImageUrl(uploaded.imageUrl);
       setCloudinaryPublicId(uploaded.cloudinaryPublicId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Échec de l'envoi de l'image");
+      setError(err instanceof Error ? err.message : "Image upload failed");
     }
   }
 
@@ -49,18 +49,18 @@ export default function NewServicePage() {
       });
       router.push("/admin/services");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible de créer le service");
+      setError(err instanceof Error ? err.message : "Unable to create the service");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <DashboardShell title="Nouveau service">
+    <DashboardShell title="New service">
       <form onSubmit={onSubmit} className="card-shadow max-w-3xl space-y-4 rounded-[6px] bg-white p-6">
         {error && <p className="text-sm text-[#8a2a2a]">{error}</p>}
         <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-          Photo principale
+          Main photo
           <input
             type="file"
             accept="image/*"
@@ -68,9 +68,9 @@ export default function NewServicePage() {
             className="mt-2 block w-full text-sm normal-case tracking-normal"
           />
         </label>
-        {imageUrl && <p className="text-xs text-[#1f6b3a]">Image enregistrée sur Cloudinary.</p>}
+        {imageUrl && <p className="text-xs text-[#1f6b3a]">Image uploaded to Cloudinary.</p>}
         <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-          Nom
+          Name
           <input
             required
             maxLength={180}
@@ -96,13 +96,13 @@ export default function NewServicePage() {
               type="number"
               min={0}
               value={form.sortOrder}
-              placeholder="Automatique"
+              placeholder="Automatic"
               onChange={(e) => setForm((f) => ({ ...f, sortOrder: e.target.value }))}
               className="mt-1.5 w-full rounded-[3px] border border-[#e4dfd4] px-3 py-2.5 text-sm normal-case tracking-normal outline-none focus:border-gold-500"
             />
           </label>
           <label className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-            Statut
+            Status
             <select
               value={form.status}
               onChange={(e) =>
@@ -110,13 +110,13 @@ export default function NewServicePage() {
               }
               className="mt-1.5 w-full rounded-[3px] border border-[#e4dfd4] bg-white px-3 py-2.5 text-sm normal-case tracking-normal outline-none focus:border-gold-500"
             >
-              <option value="draft">Brouillon</option>
-              <option value="published">Publié</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
             </select>
           </label>
         </div>
         <button disabled={busy} className="btn btn-gold">
-          {busy ? "Enregistrement…" : "Créer le service"}
+          {busy ? "Saving…" : "Create service"}
         </button>
       </form>
     </DashboardShell>

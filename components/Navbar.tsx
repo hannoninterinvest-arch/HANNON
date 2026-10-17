@@ -58,7 +58,7 @@ export default function Navbar() {
           scrolled ? "py-2.5" : "py-3.5"
         }`}
       >
-        <Link href="/" className="group flex items-center gap-3" aria-label="HANNON - accueil">
+        <Link href="/" className="group flex items-center gap-3" aria-label="HANNON - home">
           <div className="relative h-11 w-11 shrink-0 transition-transform duration-500 group-hover:scale-105">
             <Image
               src="https://res.cloudinary.com/dbzweuzla/image/upload/v1786402383/logoha_lpe5ct.webp"
@@ -78,7 +78,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <nav className="hidden lg:block" aria-label="Navigation principale">
+        <nav className="hidden lg:block" aria-label="Main navigation">
           <ul className="flex items-center gap-9">
             {NAV_LINKS.map((link) => {
               const active = isActive(link.href, pathname);
@@ -127,7 +127,7 @@ export default function Navbar() {
             Contact
           </Link>
           <button
-            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] transition-colors hover:border-gold-500 lg:hidden"
             onClick={() => setOpen((v) => !v)}
@@ -153,7 +153,7 @@ export default function Navbar() {
 
       {open && (
         <nav
-          aria-label="Menu mobile"
+          aria-label="Mobile menu"
           className="anim-menu-in absolute inset-x-0 top-full h-[calc(100dvh-64px)] overflow-y-auto bg-navy-900/[0.98] backdrop-blur-xl lg:hidden"
         >
           <div className="section-pad mx-auto flex min-h-full max-w-wrap flex-col py-8">
@@ -192,7 +192,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="btn btn-gold w-full"
               >
-                Envoyer une proposition
+                Send a proposal
               </Link>
               {isAdmin && (
                 <>

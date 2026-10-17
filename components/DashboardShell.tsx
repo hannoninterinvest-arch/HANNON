@@ -9,7 +9,7 @@ const adminNav = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/projects", label: "Projects" },
   { href: "/admin/services", label: "Services" },
-  { href: "/admin/inquiries", label: "Propositions et questions" },
+  { href: "/admin/inquiries", label: "Proposals & questions" },
   { href: "/admin/investors", label: "Investors" },
   { href: "/admin/requests", label: "Requests" },
 ];

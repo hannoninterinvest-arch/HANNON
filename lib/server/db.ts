@@ -14,7 +14,7 @@ function databaseConfig() {
   if (!raw) {
     throw new HttpError(
       500,
-      "La base PostgreSQL n'est pas configurée. Ajoutez DATABASE_URL dans les variables d'environnement Vercel.",
+      "The PostgreSQL database is not configured. Add DATABASE_URL to the Vercel environment variables.",
     );
   }
   const local = /localhost|127\.0\.0\.1/.test(raw);
@@ -86,7 +86,7 @@ async function prepare() {
     await seed(client);
   } catch (error) {
     if (error instanceof HttpError) throw error;
-    const message = error instanceof Error ? error.message : "Erreur PostgreSQL";
+    const message = error instanceof Error ? error.message : "PostgreSQL error";
     throw new HttpError(500, message);
   } finally {
     client.release();

@@ -60,7 +60,7 @@ function PlatformBlock({ platform }: { platform: ServicePlatform }) {
             rel="noopener noreferrer"
             className="btn btn-gold mt-5"
           >
-            Accéder à la plateforme
+            Access the platform
           </a>
         ) : null}
       </div>
@@ -77,7 +77,7 @@ export default function ServiceDetailPage() {
     if (!params.slug) return;
     api<HannonService>(`/services/by-slug/${encodeURIComponent(params.slug)}`)
       .then(setService)
-      .catch((e) => setError(e instanceof Error ? e.message : "Service introuvable"));
+      .catch((e) => setError(e instanceof Error ? e.message : "Service not found"));
   }, [params.slug]);
 
   if (error) {
@@ -85,7 +85,7 @@ export default function ServiceDetailPage() {
       <main className="bg-ivory px-6 py-20 text-center text-muted-dark">
         <p>{error}</p>
         <Link href="/services" className="mt-4 inline-block text-gold-500">
-          Retour aux services
+          Back to services
         </Link>
       </main>
     );
@@ -94,7 +94,7 @@ export default function ServiceDetailPage() {
   if (!service) {
     return (
       <main className="bg-ivory px-6 py-20 text-center text-muted-dark">
-        Chargement du service…
+        Loading service…
       </main>
     );
   }
@@ -140,7 +140,7 @@ export default function ServiceDetailPage() {
         {service.description ? (
           <section className="card-shadow rounded-2xl bg-white p-6 sm:p-8">
             <h2 className="text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
-              Présentation
+              Overview
             </h2>
             <p className="mt-4 whitespace-pre-line text-[15px] font-light leading-relaxed text-navy-800">
               {service.description}
@@ -151,7 +151,7 @@ export default function ServiceDetailPage() {
         {service.platforms?.length ? (
           <section className="space-y-6">
             <h2 className="font-serif text-3xl text-navy-900">
-              Plateformes et fonctionnalités
+              Platforms & features
             </h2>
             {service.platforms.map((platform) => (
               <PlatformBlock key={platform.id} platform={platform} />

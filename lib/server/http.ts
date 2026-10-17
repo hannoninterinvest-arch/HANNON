@@ -41,14 +41,14 @@ export function fail(error: unknown) {
   if (/ECONNREFUSED|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|ECONNRESET|password authentication|no pg_hba|certificate|SSL|channel_binding|Invalid URL/i.test(text)) {
     return ok(
       {
-        message: `Connexion à PostgreSQL impossible. Vérifiez DATABASE_URL sur Vercel. ${text}`.trim(),
+        message: `Unable to connect to PostgreSQL. Check DATABASE_URL on Vercel. ${text}`.trim(),
         statusCode: 500,
       },
       500,
     );
   }
   return ok(
-    { message: text || "Erreur interne du serveur.", statusCode: 500 },
+    { message: text || "Internal server error.", statusCode: 500 },
     500,
   );
 }

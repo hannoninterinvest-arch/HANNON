@@ -95,7 +95,7 @@ export default function EditServicePage() {
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e instanceof Error ? e.message : "Service introuvable"));
+    load().catch((e) => setError(e instanceof Error ? e.message : "Service not found"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
@@ -106,7 +106,7 @@ export default function EditServicePage() {
       const uploaded = await uploadServiceImage(file);
       assign(uploaded.imageUrl, uploaded.cloudinaryPublicId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Échec de l'envoi de l'image");
+      setError(err instanceof Error ? err.message : "Image upload failed");
     }
   }
 
@@ -127,10 +127,10 @@ export default function EditServicePage() {
           cloudinaryPublicId: cloudinaryPublicId || null,
         }),
       });
-      setNotice("Service enregistré.");
+      setNotice("Service saved.");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Enregistrement impossible");
+      setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setBusy(false);
     }
@@ -150,10 +150,10 @@ export default function EditServicePage() {
         method: "PATCH",
         body: JSON.stringify(payload(draft)),
       });
-      setNotice("Plateforme enregistrée.");
+      setNotice("Platform saved.");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Enregistrement impossible");
+      setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setBusy(false);
     }
@@ -162,13 +162,13 @@ export default function EditServicePage() {
   async function removePlatform(draft: PlatformDraft) {
     if (!draft.id) return;
     const label = draft.name.trim() || "cette plateforme";
-    if (!confirm(`Supprimer ${label} ? Cette action est définitive.`)) return;
+    if (!confirm(`Delete ${label}? This action cannot be undone.`)) return;
     setError("");
     try {
       await api(`/services/${params.id}/platforms/${draft.id}`, { method: "DELETE" });
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Suppression impossible");
+      setError(err instanceof Error ? err.message : "Deletion failed");
     }
   }
 
@@ -184,10 +184,10 @@ export default function EditServicePage() {
         body: JSON.stringify(payload(creating)),
       });
       setCreating(null);
-      setNotice("Plateforme créée.");
+      setNotice("Platform created.");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Création impossible");
+      setError(err instanceof Error ? err.message : "Creation failed");
     } finally {
       setBusy(false);
     }
@@ -196,7 +196,7 @@ export default function EditServicePage() {
   if (!service && !error) {
     return (
       <DashboardShell title="Service">
-        <p className="text-sm text-muted-dark">Chargement…</p>
+        <p className="text-sm text-muted-dark">Loading…</p>
       </DashboardShell>
     );
   }
@@ -212,7 +212,7 @@ export default function EditServicePage() {
             href={`/services/${service.slug}`}
             className="text-[11px] uppercase tracking-[1.5px] text-navy-800"
           >
-            Voir la page publique
+            View public page
           </Link>
         )}
       </div>
@@ -221,7 +221,7 @@ export default function EditServicePage() {
 
       <form onSubmit={saveService} className="card-shadow max-w-3xl space-y-4 rounded-[6px] bg-white p-6">
         <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-          Photo principale
+          Main photo
           <input
             type="file"
             accept="image/*"
@@ -236,7 +236,7 @@ export default function EditServicePage() {
         </label>
         {imageUrl && (
           <div className="flex items-center gap-4">
-            <p className="text-xs text-[#1f6b3a]">Photo prête à être enregistrée.</p>
+            <p className="text-xs text-[#1f6b3a]">Photo ready to be saved.</p>
             <button
               type="button"
               onClick={() => {
@@ -245,12 +245,12 @@ export default function EditServicePage() {
               }}
               className="text-[11px] uppercase tracking-[1px] text-[#8a2a2a]"
             >
-              Retirer
+              Remove
             </button>
           </div>
         )}
         <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-          Nom
+          Name
           <input required maxLength={180} value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
         </label>
         <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
@@ -275,36 +275,36 @@ export default function EditServicePage() {
             />
           </label>
           <label className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-            Statut
+            Status
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as PublishStatus)}
               className={`${fieldClass} bg-white`}
             >
-              <option value="draft">Brouillon</option>
-              <option value="published">Publié</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
             </select>
           </label>
         </div>
         <button disabled={busy} className="btn btn-gold">
-          {busy ? "Enregistrement…" : "Enregistrer le service"}
+          {busy ? "Saving…" : "Save service"}
         </button>
       </form>
 
       <section className="mt-10 max-w-3xl">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="font-serif text-2xl text-navy-900">Plateformes</h2>
+          <h2 className="font-serif text-2xl text-navy-900">Platforms</h2>
           {!creating && (
             <button
               onClick={() => setCreating(emptyDraft(platforms.length))}
               className="btn btn-outline-navy px-4 py-2 text-[10px]"
             >
-              Ajouter
+              Add
             </button>
           )}
         </div>
         <p className="mb-4 text-sm text-muted-dark">
-          Deux images maximum, toutes deux facultatives. Le bouton public n&apos;apparaît que si un lien est renseigné.
+          Up to two images, both optional. The public button only appears when a link is provided.
         </p>
 
         <div className="space-y-4">
@@ -340,7 +340,7 @@ export default function EditServicePage() {
 
         {creating && (
           <form onSubmit={createPlatform} className="card-shadow mt-4 space-y-4 rounded-[6px] bg-white p-5">
-            <h3 className="font-serif text-xl">Nouvelle plateforme</h3>
+            <h3 className="font-serif text-xl">New platform</h3>
             <PlatformFields
               draft={creating}
               onChange={(patch) => setCreating({ ...creating, ...patch })}
@@ -373,10 +373,10 @@ export default function EditServicePage() {
             />
             <div className="flex gap-3">
               <button disabled={busy} className="btn btn-gold">
-                Créer
+                Create
               </button>
               <button type="button" onClick={() => setCreating(null)} className="text-sm text-muted-dark">
-                Annuler
+                Cancel
               </button>
             </div>
           </form>
@@ -406,16 +406,16 @@ function PlatformEditor({
   return (
     <div className="card-shadow space-y-4 rounded-[6px] bg-white p-5">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-serif text-xl">{draft.name.trim() || "À renseigner"}</h3>
+        <h3 className="font-serif text-xl">{draft.name.trim() || "To be completed"}</h3>
         <StatusBadge status={draft.status} />
       </div>
       <PlatformFields draft={draft} onChange={onChange} onImage={onImage} onClearImage={onClearImage} />
       <div className="flex gap-4">
         <button type="button" disabled={busy} onClick={onSave} className="btn btn-gold">
-          Enregistrer
+          Save
         </button>
         <button type="button" onClick={onDelete} className="text-[11px] uppercase tracking-[1.5px] text-[#8a2a2a]">
-          Supprimer
+          Delete
         </button>
       </div>
     </div>
@@ -436,7 +436,7 @@ function PlatformFields({
   return (
     <>
       <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-        Nom
+        Name
         <input
           maxLength={180}
           value={draft.name}
@@ -455,7 +455,7 @@ function PlatformFields({
         />
       </label>
       <label className="block text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-        Lien (facultatif)
+        Link (optional)
         <input
           type="url"
           maxLength={500}
@@ -467,13 +467,13 @@ function PlatformFields({
       </label>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ImageSlot
-          label="Image 1 (facultative)"
+          label="Image 1 (optional)"
           url={draft.imageUrl}
           onFile={(file) => onImage(file, 1)}
           onClear={() => onClearImage(1)}
         />
         <ImageSlot
-          label="Image 2 (facultative)"
+          label="Image 2 (optional)"
           url={draft.secondImageUrl}
           onFile={(file) => onImage(file, 2)}
           onClear={() => onClearImage(2)}
@@ -491,14 +491,14 @@ function PlatformFields({
           />
         </label>
         <label className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-          Statut
+          Status
           <select
             value={draft.status}
             onChange={(e) => onChange({ status: e.target.value as PublishStatus })}
             className={`${fieldClass} bg-white`}
           >
-            <option value="draft">Brouillon</option>
-            <option value="published">Publié</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
           </select>
         </label>
       </div>
@@ -530,7 +530,7 @@ function ImageSlot({
       </label>
       {url ? (
         <button type="button" onClick={onClear} className="mt-2 text-[11px] uppercase tracking-[1px] text-[#8a2a2a]">
-          Retirer cette image
+          Remove this image
         </button>
       ) : null}
     </div>

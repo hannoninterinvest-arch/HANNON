@@ -135,13 +135,13 @@ export default function ProjectDetailPage() {
 
           <div className="card-shadow rounded-2xl bg-navy-900 p-6 text-white">
             <h3 className="font-serif text-2xl">
-              Envoyez votre proposition ou votre question
+              Send your proposal or your question
             </h3>
             <p className="mt-3 text-sm text-muted">
-              Aucun compte n&apos;est nécessaire pour écrire à HANNON au sujet de ce projet.
+              No account is needed to write to HANNON about this project.
             </p>
             <Link href="/contact" className="btn btn-gold mt-5 w-full">
-              Écrire à HANNON
+              Contact HANNON
             </Link>
           </div>
         </aside>

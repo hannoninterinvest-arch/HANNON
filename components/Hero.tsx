@@ -91,7 +91,7 @@ export default function Hero() {
               Explore Projects <span aria-hidden>→</span>
             </Link>
             <Link href="/contact" className="btn btn-outline">
-              Envoyer une proposition
+              Send a proposal
             </Link>
           </div>
         </div>

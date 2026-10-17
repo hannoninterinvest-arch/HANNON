@@ -7,19 +7,19 @@ import PageHeader from "@/components/PageHeader";
 
 const INFO = [
   {
-    label: "E-mail",
+    label: "Email",
     value: "contact@hannoninterinvest.com",
     href: "mailto:contact@hannoninterinvest.com",
     icon: <path d="M3 6l9 7 9-7M3 6v12h18V6" />,
   },
   {
-    label: "Téléphone",
+    label: "Phone",
     value: "+216 56 147 900",
     href: "tel:+21656147900",
     icon: <path d="M3 5c0 9 7 16 16 16l3-4-6-3-2 2c-3-1.5-5-3.5-6-6l2-2-3-6z" />,
   },
   {
-    label: "Adresse",
+    label: "Address",
     value: "Immeuble Saadi, Tour EF, Menzah 4, Tunis 1082 - Tunisie",
     href: "",
     icon: (
@@ -32,7 +32,7 @@ const INFO = [
 ];
 
 const SUCCESS =
-  "Merci, votre message a bien été reçu. Notre équipe vous répondra à l'adresse e-mail indiquée.";
+  "Thank you, your message has been received. Our team will reply to the email address you provided.";
 
 export default function ContactPage() {
   const startedAt = useRef(Date.now());
@@ -64,7 +64,7 @@ export default function ContactPage() {
       });
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible d'envoyer le message.");
+      setError(err instanceof Error ? err.message : "Unable to send the message.");
     } finally {
       lock.current = false;
       setBusy(false);
@@ -77,10 +77,10 @@ export default function ContactPage() {
         eyebrow="Contact"
         title={
           <>
-            Envoyez votre <span className="gold-text">proposition</span> ou votre question
+            Send your <span className="gold-text">proposal</span> or your question
           </>
         }
-        description="Aucun compte n'est nécessaire. Notre équipe vous répondra à l'adresse e-mail indiquée."
+        description="No account is needed. Our team will reply to the email address you provide."
       />
 
       <div className="bg-ivory py-12 sm:py-16">
@@ -125,10 +125,10 @@ export default function ContactPage() {
 
           <div className="card-shadow order-1 rounded-3xl bg-white p-6 sm:p-9 lg:order-2">
             <h2 className="font-serif text-[28px] font-semibold text-navy-900">
-              Écrivez-nous
+              Write to us
             </h2>
             <p className="mt-1.5 text-sm font-light text-muted-dark">
-              Tous les champs sont obligatoires.
+              All fields are required.
             </p>
 
             {done ? (
@@ -156,7 +156,7 @@ export default function ContactPage() {
                 )}
                 <div className="absolute left-[-9999px] h-0 overflow-hidden" aria-hidden="true">
                   <label>
-                    Site web
+                    Website
                     <input
                       type="text"
                       tabIndex={-1}
@@ -167,24 +167,24 @@ export default function ContactPage() {
                   </label>
                 </div>
                 <label className="field-label">
-                  Adresse e-mail
+                  Email address
                   <input
                     required
                     type="email"
                     autoComplete="email"
                     maxLength={254}
-                    placeholder="vous@exemple.com"
+                    placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="field-input"
                   />
                 </label>
                 <fieldset className="mt-6">
-                  <legend className="field-label">Type de message</legend>
+                  <legend className="field-label">Message type</legend>
                   <div className="mt-2 grid grid-cols-2 gap-3">
                     {(
                       [
-                        ["proposition", "Proposition"],
+                        ["proposition", "Proposal"],
                         ["question", "Question"],
                       ] as const
                     ).map(([value, label]) => (
@@ -216,14 +216,14 @@ export default function ContactPage() {
                     minLength={5}
                     maxLength={5000}
                     rows={6}
-                    placeholder="Décrivez votre proposition ou votre question…"
+                    placeholder="Describe your proposal or your question…"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="field-input resize-y"
                   />
                 </label>
                 <button disabled={busy} className="btn btn-gold mt-7 w-full disabled:opacity-60">
-                  {busy ? "Envoi…" : "Envoyer"}
+                  {busy ? "Sending…" : "Send"}
                 </button>
               </form>
             )}

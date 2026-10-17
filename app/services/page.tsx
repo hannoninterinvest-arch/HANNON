@@ -13,7 +13,7 @@ export default function ServicesPage() {
   useEffect(() => {
     api<HannonService[]>("/services")
       .then(setServices)
-      .catch((e) => setError(e instanceof Error ? e.message : "Impossible de charger les services."));
+      .catch((e) => setError(e instanceof Error ? e.message : "Unable to load services."));
   }, []);
 
   return (
@@ -25,14 +25,14 @@ export default function ServicesPage() {
             Services <span className="gold-text">HANNON</span>
           </>
         }
-        description="Découvrez les activités publiées par HANNON International Investments. Chaque carte ouvre la page du service."
+        description="Discover the activities published by HANNON International Investments. Each card opens the service page."
       />
       <div className="bg-ivory py-12 sm:py-16">
         <div className="section-pad mx-auto max-w-wrap">
           {error && <p className="text-sm text-[#8a2a2a]">{error}</p>}
           {!error && services.length === 0 && (
             <p className="rounded-2xl border border-dashed border-gold-500/40 bg-white px-6 py-10 text-center text-sm text-muted-dark">
-              Aucun service publié pour le moment.
+              No published services yet.
             </p>
           )}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7">

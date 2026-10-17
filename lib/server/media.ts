@@ -16,7 +16,7 @@ function configure() {
   if (!configured()) {
     throw new HttpError(
       500,
-      "Le stockage d'images n'est pas configuré. Renseignez CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY et CLOUDINARY_API_SECRET dans les variables d'environnement Vercel.",
+      "Image storage is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in the Vercel environment variables.",
     );
   }
   cloudinary.config({
@@ -33,7 +33,7 @@ export function uploadBuffer(buffer: Buffer, folder: string) {
       { folder, resource_type: "image" },
       (error, result) => {
         if (error || !result) {
-          reject(error || new HttpError(500, "L'envoi de l'image a échoué."));
+          reject(error || new HttpError(500, "Image upload failed."));
           return;
         }
         resolve(result);
@@ -60,29 +60,27 @@ export async function readImage(req: NextRequest, audience: "service" | "project
   } catch {
     throw new HttpError(
       400,
-      audience === "service"
-        ? "Le fichier image est obligatoire."
-        : "Image file is required",
+      "Image file is required.",
     );
   }
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) {
     throw new HttpError(
       400,
-      audience === "service" ? "Le fichier image est obligatoire." : "Image file is required",
+      "Image file is required.",
     );
   }
   if (!file.type?.startsWith("image/")) {
     throw new HttpError(
       400,
-      audience === "service" ? "Seules les images sont acceptées." : "Only image files are allowed",
+      audience === "service" ? "Only image files are allowed." : "Only image files are allowed",
     );
   }
   if (file.size > MAX_BYTES) {
     throw new HttpError(
       400,
       audience === "service"
-        ? "L'image dépasse 4 Mo. Réduisez le fichier avant de l'envoyer."
+        ? "The image exceeds 4 MB. Please reduce the file size before uploading."
         : "Image must be 4 MB or smaller.",
     );
   }
@@ -94,16 +92,16 @@ export function normalizeLink(link: unknown) {
   const value = String(link).trim();
   if (!value) return null;
   if (value.length > 500) {
-    throw new HttpError(400, "Le lien est trop long.");
+    throw new HttpError(400, "The link is too long.");
   }
   let url: URL;
   try {
     url = new URL(value);
   } catch {
-    throw new HttpError(400, "Le lien doit être une URL http ou https valide.");
+    throw new HttpError(400, "The link must be a valid http or https URL.");
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new HttpError(400, "Le lien doit commencer par http:// ou https://.");
+    throw new HttpError(400, "The link must start with http:// or https://.");
   }
   return value;
 }
@@ -113,16 +111,16 @@ export function normalizeImageUrl(url: unknown) {
   const value = String(url).trim();
   if (!value) return null;
   if (value.length > 2000) {
-    throw new HttpError(400, "L'adresse de l'image est trop longue.");
+    throw new HttpError(400, "The image URL is too long.");
   }
   let parsed: URL;
   try {
     parsed = new URL(value);
   } catch {
-    throw new HttpError(400, "L'adresse de l'image est invalide.");
+    throw new HttpError(400, "The image URL is invalid.");
   }
   if (parsed.protocol !== "https:") {
-    throw new HttpError(400, "L'image doit être servie en HTTPS.");
+    throw new HttpError(400, "The image must be served over HTTPS.");
   }
   return value;
 }
@@ -131,6 +129,6 @@ export function normalizePublicId(value: unknown, max = 512) {
   if (value == null) return null;
   const trimmed = String(value).trim();
   if (!trimmed) return null;
-  if (trimmed.length > max) throw new HttpError(400, "Identifiant d'image trop long.");
+  if (trimmed.length > max) throw new HttpError(400, "Image identifier is too long.");
   return trimmed;
 }
