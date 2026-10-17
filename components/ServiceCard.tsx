@@ -1,32 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { HannonService } from "@/lib/types";
-
-function useInView<T extends HTMLElement>(threshold = 0.2) {
-  const ref = useRef<T | null>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, inView };
-}
+import Reveal from "./Reveal";
 
 export default function ServiceCard({
   service,
@@ -35,55 +12,69 @@ export default function ServiceCard({
   service: Pick<HannonService, "name" | "slug" | "description" | "imageUrl">;
   index: number;
 }) {
-  const { ref, inView } = useInView<HTMLAnchorElement>(0.15);
   const initial = service.name.trim().charAt(0) || "H";
+  const number = String(index + 1).padStart(2, "0");
 
   return (
-    <Link
-      href={`/services/${service.slug}`}
-      ref={ref}
-      style={{ transitionDelay: inView ? `${index * 90}ms` : "0ms" }}
-      className={`card-shadow card-shadow-hover group relative flex flex-col overflow-hidden rounded-[6px] bg-white transition-all duration-700 ease-out
-        ${inView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
-        hover:bg-[#faf8f3]`}
-    >
-      <span
-        className="absolute left-0 top-0 z-[1] h-full w-[3px] scale-y-0 bg-gold-500 transition-transform
-          duration-300 ease-out group-hover:scale-y-100"
-      />
-
-      {service.imageUrl ? (
-        <div className="relative h-44 w-full">
-          <Image
-            src={service.imageUrl}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
-            className="object-cover"
-          />
-        </div>
-      ) : null}
-
-      <div className="px-6 py-[22px]">
-        {!service.imageUrl && (
-          <div
-            className="mb-3 flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#faf3e4]
-              font-serif text-lg text-gold-500 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-gold-500 group-hover:text-white"
-          >
-            {initial}
+    <Reveal delay={(index % 3) * 90} className="h-full">
+      <Link
+        href={`/services/${service.slug}`}
+        className="card-shadow card-shadow-hover group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white"
+      >
+        {service.imageUrl ? (
+          <div className="relative h-48 w-full overflow-hidden bg-navy-800">
+            <Image
+              src={service.imageUrl}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-navy-900/60 via-transparent to-transparent" />
+            <span className="absolute left-4 top-4 rounded-full bg-navy-900/70 px-3 py-1 font-serif text-[13px] font-semibold tracking-[1px] text-gold-300 backdrop-blur-md">
+              {number}
+            </span>
+          </div>
+        ) : (
+          <div className="relative flex h-28 items-center justify-between overflow-hidden bg-navy-800 px-6">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(80% 160% at 100% 0%, rgba(201,163,92,0.3) 0%, transparent 65%)",
+              }}
+            />
+            <span
+              className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-gold-500/40 bg-gold-500/10 font-serif text-2xl font-semibold text-gold-300 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 group-hover:bg-gold-500 group-hover:text-navy-900"
+            >
+              {initial}
+            </span>
+            <span className="relative font-serif text-4xl font-semibold text-white/15">{number}</span>
           </div>
         )}
 
-        <h3 className="mb-1.5 text-[12.5px] font-bold uppercase tracking-[1px] text-navy-900">
-          {service.name}
-        </h3>
-        {service.description ? (
-          <p className="line-clamp-4 text-[13px] font-light leading-[1.5] text-muted-dark">
-            {service.description}
-          </p>
-        ) : null}
-        <span className="mt-2 block h-px w-0 bg-gold-500/60 transition-all duration-500 ease-out group-hover:w-8" />
-      </div>
-    </Link>
+        <div className="flex flex-1 flex-col p-6">
+          <h3 className="font-serif text-[22px] font-semibold leading-snug text-navy-900">
+            {service.name}
+          </h3>
+          {service.description ? (
+            <p className="mt-2.5 line-clamp-4 text-[14px] font-light leading-[1.7] text-muted-dark">
+              {service.description}
+            </p>
+          ) : null}
+          <span className="mt-auto flex items-center gap-2 pt-5 text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
+            Découvrir
+            <span
+              aria-hidden
+              className="inline-block transition-transform duration-300 group-hover:translate-x-1.5"
+            >
+              →
+            </span>
+          </span>
+        </div>
+
+        <span className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-gradient-to-r from-gold-500 to-gold-300 transition-transform duration-500 ease-out group-hover:scale-x-100" />
+      </Link>
+    </Reveal>
   );
 }

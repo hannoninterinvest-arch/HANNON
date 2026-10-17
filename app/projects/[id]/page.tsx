@@ -21,12 +21,12 @@ export default function ProjectDetailPage() {
 
   if (error) {
     return (
-      <main className="px-10 py-20 text-center text-muted-dark">{error}</main>
+      <main className="px-6 py-24 text-center text-muted-dark">{error}</main>
     );
   }
   if (!project) {
     return (
-      <main className="px-10 py-20 text-center text-muted-dark">
+      <main className="px-6 py-24 text-center text-muted-dark">
         Loading project…
       </main>
     );
@@ -36,7 +36,7 @@ export default function ProjectDetailPage() {
 
   return (
     <main className="bg-ivory pb-20">
-      <div className="relative h-[360px] w-full overflow-hidden bg-navy-900">
+      <div className="relative h-[300px] sm:h-[400px] w-full overflow-hidden bg-navy-900">
         {project.imageUrl && (
           <Image
             src={project.imageUrl}
@@ -47,18 +47,18 @@ export default function ProjectDetailPage() {
             sizes="100vw"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-900 via-navy-900/75 to-navy-900/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/70 to-navy-900/25 sm:bg-gradient-to-r sm:via-navy-900/75 sm:to-navy-900/20" />
         <div className="relative z-[1] mx-auto flex h-full max-w-wrap flex-col justify-end px-6 pb-10 lg:px-10">
           <Link
             href="/projects"
-            className="mb-4 text-[11px] uppercase tracking-[2px] text-gold-400"
+            className="mb-4 text-[11px] font-semibold uppercase tracking-[2px] text-gold-400 transition-colors hover:text-gold-300"
           >
             ← All projects
           </Link>
           <div className="text-[11px] uppercase tracking-[2px] text-gold-400">
             {project.sector} · {project.location}
           </div>
-          <h1 className="mt-2 font-serif text-4xl text-white sm:text-5xl">
+          <h1 className="mt-2 display text-[34px] text-white sm:text-5xl lg:text-6xl">
             {project.title}
           </h1>
         </div>
@@ -66,7 +66,7 @@ export default function ProjectDetailPage() {
 
       <div className="mx-auto grid max-w-wrap grid-cols-1 gap-8 px-6 py-10 lg:grid-cols-[1.4fr_0.8fr] lg:px-10">
         <div>
-          <div className="card-shadow rounded-[6px] bg-white p-7">
+          <div className="card-shadow rounded-2xl bg-white p-6 sm:p-8">
             <h2 className="text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
               Mandate overview
             </h2>
@@ -78,7 +78,7 @@ export default function ProjectDetailPage() {
                 {project.highlights.map((item) => (
                   <li
                     key={item}
-                    className="rounded-[4px] border border-[#efebe3] bg-ivory px-3 py-3 text-[12.5px] text-navy-800"
+                    className="rounded-xl border border-[#efebe3] bg-ivory px-3 py-3 text-[12.5px] text-navy-800"
                   >
                     {item}
                   </li>
@@ -96,7 +96,7 @@ export default function ProjectDetailPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="card-shadow rounded-[6px] bg-white p-6">
+          <div className="card-shadow rounded-2xl bg-white p-6">
             <div className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
               Funding progress
             </div>
@@ -105,7 +105,7 @@ export default function ProjectDetailPage() {
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#efebe3]">
               <div
-                className="h-full bg-gold-500"
+                className="h-full rounded-full bg-gradient-to-r from-gold-500 to-gold-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -133,14 +133,14 @@ export default function ProjectDetailPage() {
             </dl>
           </div>
 
-          <div className="card-shadow rounded-[6px] bg-navy-900 p-6 text-white">
+          <div className="card-shadow rounded-2xl bg-navy-900 p-6 text-white">
             <h3 className="font-serif text-2xl">
               Envoyez votre proposition ou votre question
             </h3>
             <p className="mt-3 text-sm text-muted">
               Aucun compte n&apos;est nécessaire pour écrire à HANNON au sujet de ce projet.
             </p>
-            <Link href="/contact" className="btn btn-gold mt-5 w-full justify-center">
+            <Link href="/contact" className="btn btn-gold mt-5 w-full">
               Écrire à HANNON
             </Link>
           </div>

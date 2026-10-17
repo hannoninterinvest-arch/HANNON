@@ -5,6 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import ProjectCard from "./ProjectCard";
+import Reveal from "./Reveal";
 
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -17,34 +18,33 @@ export default function ProjectsSection() {
   }, []);
 
   return (
-    <section id="projects" className="bg-ivory py-16">
-      <div className="mx-auto max-w-wrap px-10">
-        <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section id="projects" className="relative bg-ivory py-16 sm:py-24">
+      <div className="section-pad mx-auto max-w-wrap">
+        <Reveal className="mb-10 flex flex-col gap-6 sm:mb-14 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="eyebrow">Investment Projects</div>
-            <h2 className="mt-2 text-[26px] font-bold uppercase leading-tight text-navy-900 sm:text-[30px]">
+            <h2 className="display mt-4 text-[34px] uppercase text-navy-900 sm:text-[46px]">
               Selected Opportunities.
               <br />
-              <span className="text-gold-500">Institutional Access.</span>
+              <span className="gold-text">Institutional Access.</span>
             </h2>
           </div>
-          <Link
-            href="/projects"
-            className="btn btn-outline-navy w-fit px-[22px] py-[11px] text-[10px]"
-          >
-            View all projects
+          <Link href="/projects" className="btn btn-outline-navy w-full sm:w-fit">
+            View all projects <span aria-hidden>→</span>
           </Link>
-        </div>
+        </Reveal>
 
         {error && (
-          <p className="rounded-[4px] border border-gold-500/30 bg-white px-5 py-4 text-sm text-muted-dark">
+          <p className="rounded-2xl border border-gold-500/30 bg-white px-5 py-4 text-sm text-muted-dark">
             {error}
           </p>
         )}
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {projects.slice(0, 3).map((project) => (
-            <ProjectCard key={project.id} project={project} />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          {projects.slice(0, 3).map((project, i) => (
+            <Reveal key={project.id} delay={i * 100} className="h-full">
+              <ProjectCard project={project} />
+            </Reveal>
           ))}
         </div>
       </div>

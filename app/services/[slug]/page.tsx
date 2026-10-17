@@ -17,7 +17,7 @@ function PlatformBlock({ platform }: { platform: ServicePlatform }) {
   const images = platformImages(platform);
 
   return (
-    <article className="card-shadow overflow-hidden rounded-[6px] bg-white">
+    <article className="card-shadow overflow-hidden rounded-2xl bg-white">
       {images.length === 1 && (
         <div className="relative h-72 w-full">
           <Image
@@ -44,7 +44,7 @@ function PlatformBlock({ platform }: { platform: ServicePlatform }) {
           ))}
         </div>
       )}
-      <div className="p-6 sm:p-7">
+      <div className="p-6 sm:p-6 sm:p-8">
         {platform.name ? (
           <h2 className="font-serif text-2xl text-navy-900">{platform.name}</h2>
         ) : null}
@@ -102,7 +102,7 @@ export default function ServiceDetailPage() {
   return (
     <main className="bg-ivory pb-20">
       {service.imageUrl ? (
-        <div className="relative h-[360px] w-full overflow-hidden bg-navy-900">
+        <div className="relative h-[300px] sm:h-[400px] w-full overflow-hidden bg-navy-900">
           <Image
             src={service.imageUrl}
             alt={service.name}
@@ -111,15 +111,15 @@ export default function ServiceDetailPage() {
             className="object-cover"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-navy-900 via-navy-900/75 to-navy-900/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/70 to-navy-900/25 sm:bg-gradient-to-r sm:via-navy-900/75 sm:to-navy-900/20" />
           <div className="relative z-[1] mx-auto flex h-full max-w-wrap flex-col justify-end px-6 pb-10 lg:px-10">
             <Link
               href="/services"
-              className="mb-4 text-[11px] uppercase tracking-[2px] text-gold-400"
+              className="mb-4 text-[11px] font-semibold uppercase tracking-[2px] text-gold-400 transition-colors hover:text-gold-300"
             >
               ← Services
             </Link>
-            <h1 className="font-serif text-4xl text-white sm:text-5xl">{service.name}</h1>
+            <h1 className="display text-[34px] text-white sm:text-5xl lg:text-6xl">{service.name}</h1>
           </div>
         </div>
       ) : (
@@ -131,14 +131,14 @@ export default function ServiceDetailPage() {
             >
               ← Services
             </Link>
-            <h1 className="mt-4 font-serif text-4xl text-white sm:text-5xl">{service.name}</h1>
+            <h1 className="mt-4 display text-[34px] text-white sm:text-5xl lg:text-6xl">{service.name}</h1>
           </div>
         </div>
       )}
 
       <div className="mx-auto max-w-wrap space-y-8 px-6 py-10 lg:px-10">
         {service.description ? (
-          <section className="card-shadow rounded-[6px] bg-white p-7">
+          <section className="card-shadow rounded-2xl bg-white p-6 sm:p-8">
             <h2 className="text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
               Présentation
             </h2>
