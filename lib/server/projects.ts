@@ -2,6 +2,7 @@ import { getPool, one, query } from "./db";
 import { has, HttpError, isUuid } from "./http";
 import { destroyImage, normalizeDriveLink, normalizePublicId, readImage, uploadBuffer } from "./media";
 import { slugify } from "./slug";
+import { assertFeaturedRoom } from "./featured";
 import { DETAIL_COLUMNS, DETAIL_SELECT, detailAssignments, detailParams, detailPlaceholders, readDetails } from "./projectDetails";
 import type { NextRequest } from "next/server";
 
@@ -9,7 +10,7 @@ type Row = Record<string, unknown>;
 
 const PROJECT_COLUMNS = `id, title, slug, description, summary, sector, location, "imageUrl",
   "cloudinaryPublicId", "targetAmount", "raisedAmount", "minInvestment", "expectedReturn",
-  "durationMonths", status, visible, highlights, "presentationUrl", ${DETAIL_SELECT}, "createdAt", "updatedAt"`;
+  "durationMonths", status, visible, highlights, "presentationUrl", ${DETAIL_SELECT}, "sortOrder", featured, "createdAt", "updatedAt"`;
 
 function highlightsOf(value: unknown) {
   if (value == null || value === "") return value == null ? null : [];
@@ -52,13 +53,13 @@ async function withStats(rows: Row[]) {
 
 export async function listVisibleProjects() {
   const rows = await query(
-    `SELECT ${PROJECT_COLUMNS} FROM projects WHERE visible = true ORDER BY "createdAt" DESC`,
+    `SELECT ${PROJECT_COLUMNS} FROM projects WHERE visible = true ORDER BY "sortOrder" ASC, "createdAt" DESC`,
   );
   return withStats(rows);
 }
 
 export async function listAllProjects() {
-  const rows = await query(`SELECT ${PROJECT_COLUMNS} FROM projects ORDER BY "createdAt" DESC`);
+  const rows = await query(`SELECT ${PROJECT_COLUMNS} FROM projects ORDER BY "sortOrder" ASC, "createdAt" DESC`);
   return withStats(rows);
 }
 
@@ -161,12 +162,19 @@ export async function createProject(body: Record<string, unknown>) {
   const cloudinaryPublicId = normalizePublicId(body.cloudinaryPublicId, 255);
   const minInvestment = requireNumber(body, "minInvestment");
   const details = readDetails(body, undefined, minInvestment);
+  const visible = body.visible === undefined ? true : Boolean(body.visible);
+  const featured = Boolean(body.featured);
+  if (featured) {
+    if (!visible) throw new HttpError(400, "Make the project visible before showing it on the home page.");
+    await assertFeaturedRoom("projects", null);
+  }
+  const first = await one(`SELECT COALESCE(MIN("sortOrder"), 1)::int - 1 AS next FROM projects`);
   const inserted = await one(
     `INSERT INTO projects
       (title, slug, description, summary, sector, location, "imageUrl", "cloudinaryPublicId",
        "targetAmount", "raisedAmount", "minInvestment", "expectedReturn", "durationMonths",
-       status, visible, highlights, "presentationUrl", ${DETAIL_COLUMNS.map((c) => `"${c}"`).join(", ")})
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17, ${detailPlaceholders(18).join(", ")})
+       status, visible, highlights, "presentationUrl", "sortOrder", featured, ${DETAIL_COLUMNS.map((c) => `"${c}"`).join(", ")})
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19, ${detailPlaceholders(20).join(", ")})
      RETURNING id`,
     [
       title,
@@ -183,9 +191,11 @@ export async function createProject(body: Record<string, unknown>) {
       expectedReturn,
       Math.round(requireNumber(body, "durationMonths")),
       optionalStatus(body.status, "open"),
-      body.visible === undefined ? true : Boolean(body.visible),
+      visible,
       highlightsText(body.highlights),
       normalizeDriveLink(body.presentationUrl),
+      Number(first?.next ?? 0),
+      featured,
       ...detailParams(details),
     ],
   );
@@ -238,6 +248,11 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
     const clash = await one(`SELECT id FROM projects WHERE slug = $1 AND id <> $2`, [next.slug, id]);
     if (clash) throw new HttpError(400, "A project with this slug already exists");
   }
+  if (has(body, "featured") && Boolean(body.featured) && !next.visible) {
+    throw new HttpError(400, "Make the project visible before showing it on the home page.");
+  }
+  const featured = !next.visible ? false : has(body, "featured") ? Boolean(body.featured) : Boolean(current.featured);
+  if (featured && !current.featured) await assertFeaturedRoom("projects", id);
   await query(
     `UPDATE projects SET
       title = $2, slug = $3, description = $4, summary = $5, sector = $6, location = $7,
@@ -269,6 +284,9 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       ...detailParams(details),
     ],
   );
+  if (featured !== Boolean(current.featured)) {
+    await query(`UPDATE projects SET featured = $2 WHERE id = $1`, [id, featured]);
+  }
   if (has(body, "stats")) {
     await query(`DELETE FROM project_stats WHERE "projectId" = $1`, [id]);
     await insertStats(id, readStats(body.stats));

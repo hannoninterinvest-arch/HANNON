@@ -36,6 +36,7 @@ import {
   updateProject,
   uploadProjectImage,
 } from "./projects";
+import { reorder } from "./featured";
 
 type User = { id: string };
 type Handler = (
@@ -67,6 +68,7 @@ const routes: { method: string; pattern: string; auth: boolean; handle: Handler 
   { method: "GET", pattern: "projects/admin/all", auth: true, handle: async () => listAllProjects() },
   { method: "GET", pattern: "projects/admin/:id", auth: true, handle: async (_req, params) => getProject(params.id, false) },
   { method: "GET", pattern: "projects/:id", auth: false, handle: async (_req, params) => getProject(params.id, true) },
+  { method: "PUT", pattern: "projects/order", auth: true, handle: async (req) => reorder("projects", await readJson(req)) },
   { method: "POST", pattern: "projects", auth: true, handle: async (req) => createProject(await readJson(req)) },
   { method: "POST", pattern: "projects/upload", auth: true, handle: async (req) => uploadProjectImage(req) },
   { method: "POST", pattern: "projects/:id/image", auth: true, handle: async (req, params) => attachProjectImage(params.id, req) },
@@ -77,6 +79,7 @@ const routes: { method: string; pattern: string; auth: boolean; handle: Handler 
   { method: "GET", pattern: "services/by-slug/:slug", auth: false, handle: async (_req, params) => publishedBySlug(params.slug) },
   { method: "GET", pattern: "services/admin/all", auth: true, handle: async () => listAdminServices() },
   { method: "GET", pattern: "services/admin/:id", auth: true, handle: async (_req, params) => getAdminService(params.id) },
+  { method: "PUT", pattern: "services/order", auth: true, handle: async (req) => reorder("services", await readJson(req)) },
   { method: "POST", pattern: "services", auth: true, handle: async (req) => createService(await readJson(req)) },
   { method: "POST", pattern: "services/upload", auth: true, handle: async (req) => uploadServiceImage(req) },
   { method: "PATCH", pattern: "services/:id", auth: true, handle: async (req, params) => updateService(params.id, await readJson(req)) },

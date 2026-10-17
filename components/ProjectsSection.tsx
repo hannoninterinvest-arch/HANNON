@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
+import { HOME_PROJECTS, pickHome } from "@/lib/home";
 import ProjectCard from "./ProjectCard";
 import Reveal from "./Reveal";
 
@@ -41,12 +42,20 @@ export default function ProjectsSection() {
         )}
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-          {projects.slice(0, 3).map((project, i) => (
+          {pickHome(projects, HOME_PROJECTS).map((project, i) => (
             <Reveal key={project.id} delay={i * 100} className="h-full">
               <ProjectCard project={project} />
             </Reveal>
           ))}
         </div>
+
+        {projects.length > 0 && (
+          <div className="mt-10 text-center">
+            <Link href="/projects" className="btn btn-gold w-full sm:w-fit">
+              Browse all {projects.length} project{projects.length > 1 ? "s" : ""} <span aria-hidden>→</span>
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

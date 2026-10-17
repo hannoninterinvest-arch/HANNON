@@ -49,6 +49,8 @@ export type Project = {
   visible: boolean;
   highlights: string[] | null;
   presentationUrl: string | null;
+  sortOrder: number;
+  featured: boolean;
   riskLevel: RiskLevel | null;
   instrument: string | null;
   maxInvestment: string | number | null;
@@ -101,6 +103,7 @@ export type HannonService = {
   imageUrl: string | null;
   cloudinaryPublicId?: string | null;
   sortOrder: number;
+  featured?: boolean;
   status?: PublishStatus;
   platforms?: ServicePlatform[];
 };

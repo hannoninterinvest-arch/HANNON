@@ -6,6 +6,7 @@ import DashboardShell from "@/components/DashboardShell";
 import StatusBadge from "@/components/StatusBadge";
 import { api } from "@/lib/api";
 import type { HannonService, PublishStatus } from "@/lib/types";
+import { HOME_SERVICES } from "@/lib/home";
 
 export default function AdminServicesPage() {
   const [services, setServices] = useState<HannonService[]>([]);
@@ -24,7 +25,7 @@ export default function AdminServicesPage() {
     load();
   }, []);
 
-  async function patch(id: string, body: { sortOrder?: number; status?: PublishStatus }) {
+  async function patch(id: string, body: { sortOrder?: number; status?: PublishStatus; featured?: boolean }) {
     setError("");
     try {
       await api(`/services/${id}`, {
@@ -36,6 +37,24 @@ export default function AdminServicesPage() {
       setError(e instanceof Error ? e.message : "Update failed");
     }
   }
+
+  async function move(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= services.length) return;
+    const next = [...services];
+    [next[index], next[target]] = [next[target], next[index]];
+    setServices(next);
+    setError("");
+    try {
+      await api("/services/order", { method: "PUT", body: JSON.stringify({ ids: next.map((s) => s.id) }) });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to save the order");
+      await load();
+    }
+  }
+
+  const featuredCount = services.filter((s) => s.featured).length;
 
   async function remove(service: HannonService) {
     if (!confirm(`Delete “${service.name}” and its platforms? This action cannot be undone.`)) {
@@ -52,20 +71,29 @@ export default function AdminServicesPage() {
 
   return (
     <DashboardShell title="Services">
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-dark">
+          Order the services with the arrows. Pick up to {HOME_SERVICES} services for the home page
+          ({featuredCount}/{HOME_SERVICES} selected). Without a selection, the first {HOME_SERVICES} are shown.
+        </p>
         <Link href="/admin/services/new" className="btn btn-gold">
           New service
         </Link>
       </div>
       {error && <p className="mb-4 text-sm text-[#8a2a2a]">{error}</p>}
       <div className="grid grid-cols-1 gap-4">
-        {services.map((service) => (
+        {services.map((service, index) => (
           <article key={service.id} className="card-shadow rounded-[6px] bg-white p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-serif text-2xl text-navy-900">{service.name}</h2>
                   {service.status && <StatusBadge status={service.status} />}
+                  {service.featured && (
+                    <span className="rounded-full bg-gold-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[1.5px] text-gold-500">
+                      Home page
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-sm text-muted-dark">
                   {service.platforms?.length || 0} plateforme
@@ -73,21 +101,25 @@ export default function AdminServicesPage() {
                   {service.description ? ` · ${service.description.slice(0, 140)}` : ""}
                 </p>
               </div>
-              <label className="text-[11px] uppercase tracking-[1.5px] text-muted-dark">
-                Order
-                <input
-                  type="number"
-                  min={0}
-                  defaultValue={service.sortOrder}
-                  key={`${service.id}-${service.sortOrder}`}
-                  onBlur={(e) => {
-                    const sortOrder = Number(e.target.value);
-                    if (!Number.isFinite(sortOrder) || sortOrder === service.sortOrder) return;
-                    patch(service.id, { sortOrder });
-                  }}
-                  className="mt-1.5 block w-24 rounded-[3px] border border-[#e4dfd4] px-3 py-2 text-sm normal-case tracking-normal outline-none focus:border-gold-500"
-                />
-              </label>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => move(index, -1)}
+                  disabled={index === 0}
+                  aria-label="Move up"
+                  className="h-8 w-8 rounded-full border border-[#e4dfd4] text-navy-800 hover:border-gold-500 disabled:opacity-30"
+                >
+                  ↑
+                </button>
+                <button
+                  onClick={() => move(index, 1)}
+                  disabled={index === services.length - 1}
+                  aria-label="Move down"
+                  className="h-8 w-8 rounded-full border border-[#e4dfd4] text-navy-800 hover:border-gold-500 disabled:opacity-30"
+                >
+                  ↓
+                </button>
+                <span className="ml-1 text-[11px] text-muted-dark">#{index + 1}</span>
+              </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-4">
               <Link
@@ -96,6 +128,14 @@ export default function AdminServicesPage() {
               >
                 Edit
               </Link>
+              {service.status === "published" && (
+                <button
+                  onClick={() => patch(service.id, { featured: !service.featured })}
+                  className="text-[11px] uppercase tracking-[1.5px] text-[#1f6b3a]"
+                >
+                  {service.featured ? "Remove from home page" : "Show on home page"}
+                </button>
+              )}
               <button
                 onClick={() =>
                   patch(service.id, {

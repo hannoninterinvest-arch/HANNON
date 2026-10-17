@@ -281,6 +281,9 @@ END $$`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiries_email_received" ON "investor_inquiries" ("email", "receivedAt")`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiry_throttles_ip" ON "inquiry_throttles" ("ipHash", "createdAt")`,
   `ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "presentationUrl" text`,
+  `ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "sortOrder" integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "featured" boolean NOT NULL DEFAULT false`,
+  `ALTER TABLE "services" ADD COLUMN IF NOT EXISTS "featured" boolean NOT NULL DEFAULT false`,
   `DO $$ BEGIN
      IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'inquiry_type_enum') THEN
        ALTER TYPE "inquiry_type_enum" ADD VALUE IF NOT EXISTS 'interest';

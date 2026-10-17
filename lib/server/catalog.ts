@@ -10,6 +10,7 @@ import {
   uploadBuffer,
 } from "./media";
 import { slugify } from "./slug";
+import { assertFeaturedRoom } from "./featured";
 
 type Row = Record<string, any>;
 
@@ -71,7 +72,7 @@ async function platformsOf(serviceId: string) {
 
 export async function listPublishedServices() {
   const rows = await query(
-    `SELECT id, name, slug, description, "imageUrl", "sortOrder"
+    `SELECT id, name, slug, description, "imageUrl", "sortOrder", featured
      FROM services WHERE status = 'published'
      ORDER BY "sortOrder" ASC, name ASC`,
   );
@@ -91,6 +92,7 @@ export async function publishedBySlug(slug: string) {
     description: service.description,
     imageUrl: service.imageUrl,
     sortOrder: service.sortOrder,
+    featured: service.featured,
     platforms,
   };
 }
@@ -138,10 +140,15 @@ export async function createService(body: Record<string, unknown>) {
   const status = publishStatus(body.status);
   assertPublishable(status, name);
   const order = has(body, "sortOrder") ? sortOrder(body.sortOrder) : await nextSortOrder();
+  const featured = Boolean(body.featured);
+  if (featured) {
+    if (status !== "published") throw new HttpError(400, "Publish the service before showing it on the home page.");
+    await assertFeaturedRoom("services", null);
+  }
   const inserted = await one(
     `INSERT INTO services
-      (name, slug, description, "imageUrl", "cloudinaryPublicId", "sortOrder", status, "placeholdersPrepared")
-     VALUES ($1,$2,$3,$4,$5,$6,$7,false)
+      (name, slug, description, "imageUrl", "cloudinaryPublicId", "sortOrder", status, "placeholdersPrepared", featured)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,false,$8)
      RETURNING id`,
     [
       name,
@@ -151,6 +158,7 @@ export async function createService(body: Record<string, unknown>) {
       normalizePublicId(body.cloudinaryPublicId),
       order,
       status,
+      featured,
     ],
   );
   return getAdminService(String(inserted?.id));
@@ -165,6 +173,12 @@ export async function updateService(id: string, body: Record<string, unknown>) {
   const status = has(body, "status") ? publishStatus(body.status) : service.status;
   const order = has(body, "sortOrder") ? sortOrder(body.sortOrder) : service.sortOrder;
   assertPublishable(status, name);
+  if (has(body, "featured") && Boolean(body.featured) && status !== "published") {
+    throw new HttpError(400, "Publish the service before showing it on the home page.");
+  }
+  const featured =
+    status !== "published" ? false : has(body, "featured") ? Boolean(body.featured) : Boolean(service.featured);
+  if (featured && !service.featured) await assertFeaturedRoom("services", id);
   let imageUrl = service.imageUrl;
   let publicId = service.cloudinaryPublicId;
   if (has(body, "imageUrl") || has(body, "cloudinaryPublicId")) {
@@ -176,9 +190,9 @@ export async function updateService(id: string, body: Record<string, unknown>) {
   }
   await query(
     `UPDATE services SET name = $2, description = $3, "imageUrl" = $4, "cloudinaryPublicId" = $5,
-      "sortOrder" = $6, status = $7, "updatedAt" = now()
+      "sortOrder" = $6, status = $7, featured = $8, "updatedAt" = now()
      WHERE id = $1`,
-    [id, name, description, imageUrl, publicId, order, status],
+    [id, name, description, imageUrl, publicId, order, status, featured],
   );
   return getAdminService(id);
 }

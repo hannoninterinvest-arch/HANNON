@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import type { HannonService } from "@/lib/types";
+import { HOME_SERVICES, pickHome } from "@/lib/home";
 import Reveal from "./Reveal";
 import ServiceCard from "./ServiceCard";
 
@@ -43,10 +45,18 @@ export default function Services() {
         )}
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7">
-          {services.map((service, i) => (
+          {pickHome(services, HOME_SERVICES).map((service, i) => (
             <ServiceCard key={service.id} service={service} index={i} />
           ))}
         </div>
+
+        {services.length > 0 && (
+          <div className="mt-10 text-center">
+            <Link href="/services" className="btn btn-outline-navy w-full sm:w-fit">
+              View all {services.length} service{services.length > 1 ? "s" : ""} <span aria-hidden>→</span>
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
