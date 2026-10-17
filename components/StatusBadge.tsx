@@ -17,6 +17,7 @@ export default function StatusBadge({
     "traité": "bg-[#e5f2ea] text-[#1f6b3a]",
     proposition: "bg-[#f4ead2] text-[#8a6a24]",
     question: "bg-[#e7eef8] text-[#1d3d6e]",
+    interest: "bg-[#f4ead2] text-[#8a6a24]",
   };
   const labels: Record<string, string> = {
     draft: "Draft",
@@ -25,6 +26,7 @@ export default function StatusBadge({
     "traité": "Handled",
     proposition: "Proposal",
     question: "Question",
+    interest: "Investment interest",
   };
   return (
     <span

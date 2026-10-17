@@ -17,6 +17,9 @@ Site Next.js déployé entièrement sur **Vercel** : pages publiques, administra
 - Compte **admin** : projets, services, propositions et questions, historique des investisseurs
 - L’inscription et la connexion investisseurs sont désactivées. La connexion administrateur reste active
 - Photos de projets et de services envoyées vers **Cloudinary**
+- **Présentation PDF** d'un projet : l'admin colle un lien Google Drive (partagé « Toute personne disposant du lien »). La page publique du projet l'affiche et permet de la télécharger
+- Formulaire **Contact** : intérêt d'investissement, budget, coordonnées, projet concerné et jusqu'à 3 fichiers (4 Mo au total). Les fichiers sont stockés sur Cloudinary en accès privé et l'admin les ouvre par lien signé
+- Page du projet : six diagrammes (capital, financement, flux mensuels, investisseurs, rendement, projection du ticket minimum)
 
 ## Compte administrateur
 

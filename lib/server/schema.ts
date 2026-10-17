@@ -280,6 +280,20 @@ END $$`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiries_type_status" ON "investor_inquiries" ("type", "status")`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiries_email_received" ON "investor_inquiries" ("email", "receivedAt")`,
   `CREATE INDEX IF NOT EXISTS "IDX_inquiry_throttles_ip" ON "inquiry_throttles" ("ipHash", "createdAt")`,
+  `ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "presentationUrl" text`,
+  `DO $$ BEGIN
+     IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'inquiry_type_enum') THEN
+       ALTER TYPE "inquiry_type_enum" ADD VALUE IF NOT EXISTS 'interest';
+     END IF;
+   EXCEPTION WHEN OTHERS THEN NULL;
+   END $$`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "name" character varying(200)`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "phone" character varying(64)`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "company" character varying(200)`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "budget" numeric(16,2)`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "projectId" uuid`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "projectTitle" character varying(255)`,
+  `ALTER TABLE "investor_inquiries" ADD COLUMN IF NOT EXISTS "attachments" jsonb NOT NULL DEFAULT '[]'::jsonb`,
   ensureForeignKey("project_stats", "projectId", "projects", "id", "FK_project_stats_project"),
   ensureForeignKey(
     "investment_requests",

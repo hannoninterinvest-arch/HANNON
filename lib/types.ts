@@ -42,6 +42,7 @@ export type Project = {
   status: ProjectStatus;
   visible: boolean;
   highlights: string[] | null;
+  presentationUrl: string | null;
   stats: ProjectStat[];
   createdAt: string;
 };
@@ -57,7 +58,7 @@ export type InvestmentRequest = {
 };
 
 export type PublishStatus = "draft" | "published";
-export type InquiryType = "proposition" | "question";
+export type InquiryType = "proposition" | "question" | "interest";
 export type InquiryStatus = "nouveau" | "traité";
 
 export type ServicePlatform = {
@@ -85,9 +86,22 @@ export type HannonService = {
   platforms?: ServicePlatform[];
 };
 
+export type InquiryAttachment = {
+  name: string;
+  size: number;
+  url: string | null;
+};
+
 export type InvestorInquiry = {
   id: string;
   email: string;
+  name: string | null;
+  phone: string | null;
+  company: string | null;
+  budget: string | number | null;
+  projectId: string | null;
+  projectTitle: string | null;
+  attachments: InquiryAttachment[];
   type: InquiryType;
   message: string;
   receivedAt: string;

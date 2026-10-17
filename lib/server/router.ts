@@ -95,7 +95,15 @@ const routes: { method: string; pattern: string; auth: boolean; handle: Handler 
     handle: async (_req, params) => removePlatform(params.id, params.platformId),
   },
 
-  { method: "POST", pattern: "inquiries", auth: false, handle: async (req) => createInquiry(await readJson(req), hashIp(clientIp(req))) },
+  {
+    method: "POST",
+    pattern: "inquiries",
+    auth: false,
+    handle: async (req) => {
+      const { fields, files } = await readInquiryBody(req);
+      return createInquiry(fields, hashIp(clientIp(req)), files);
+    },
+  },
   {
     method: "GET",
     pattern: "inquiries",
@@ -160,11 +168,37 @@ async function readJson(req: NextRequest) {
   try {
     const value = JSON.parse(text);
     if (!value || typeof value !== "object" || Array.isArray(value)) {
-      throw new HttpError(400, "JSON invalide.");
+      throw new HttpError(400, "Invalid JSON.");
     }
     return value as Record<string, unknown>;
   } catch (error) {
     if (error instanceof HttpError) throw error;
-    throw new HttpError(400, "JSON invalide.");
+    throw new HttpError(400, "Invalid JSON.");
   }
+}
+
+const MAX_FORM_BYTES = 5 * 1024 * 1024;
+
+async function readInquiryBody(req: NextRequest) {
+  const contentType = req.headers.get("content-type") || "";
+  if (!contentType.includes("multipart/form-data")) {
+    return { fields: await readJson(req), files: [] as File[] };
+  }
+  const length = Number(req.headers.get("content-length"));
+  if (Number.isFinite(length) && length > MAX_FORM_BYTES) {
+    throw new HttpError(413, "The attached files are too large. The total size must stay under 4 MB.");
+  }
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    throw new HttpError(400, "Invalid form data.");
+  }
+  const fields: Record<string, unknown> = {};
+  const files: File[] = [];
+  form.forEach((value, key) => {
+    if (typeof value === "string") fields[key] = value;
+    else if (key === "files" && value.size > 0) files.push(value);
+  });
+  return { fields, files };
 }
