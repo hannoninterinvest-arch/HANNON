@@ -106,7 +106,7 @@ export async function listAdminServices() {
   }));
 }
 
-export async function getAdminService(id: string) {
+export async function getAdminService(id: string): Promise<Record<string, any>> {
   if (!isUuid(id)) throw new HttpError(404, "Service not found");
   const service = await one(`SELECT * FROM services WHERE id = $1`, [id]);
   if (!service) throw new HttpError(404, "Service not found");

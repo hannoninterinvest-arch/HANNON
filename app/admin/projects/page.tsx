@@ -11,9 +11,11 @@ import type { Project } from "@/lib/types";
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState("");
 
   async function load() {
     try {
+      setError("");
       setProjects(await api<Project[]>("/projects/admin/all"));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to load projects");
@@ -24,10 +26,24 @@ export default function AdminProjectsPage() {
     load();
   }, []);
 
-  async function remove(id: string) {
-    if (!confirm("Delete this project and its Cloudinary image?")) return;
-    await api(`/projects/${id}`, { method: "DELETE" });
-    load();
+  async function remove(project: Project) {
+    if (
+      !confirm(
+        `Delete “${project.title}”? Its statistics, investment requests and Cloudinary image are removed too. This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    setError("");
+    setDeleting(project.id);
+    try {
+      await api(`/projects/${project.id}`, { method: "DELETE" });
+      setProjects((list) => list.filter((item) => item.id !== project.id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to delete the project");
+    } finally {
+      setDeleting("");
+    }
   }
 
   return (
@@ -65,6 +81,7 @@ export default function AdminProjectsPage() {
               <p className="text-sm text-muted-dark">
                 {project.sector} · {project.location} · {money(project.raisedAmount)} /{" "}
                 {money(project.targetAmount)}
+                {project.presentationUrl ? " · PDF presentation linked" : ""}
               </p>
               <div className="mt-2 flex gap-3">
                 <Link
@@ -73,11 +90,18 @@ export default function AdminProjectsPage() {
                 >
                   View
                 </Link>
-                <button
-                  onClick={() => remove(project.id)}
-                  className="text-[11px] uppercase tracking-[1.5px] text-[#8a2a2a]"
+                <Link
+                  href={`/admin/projects/${project.id}`}
+                  className="text-[11px] uppercase tracking-[1.5px] text-gold-500 hover:text-gold-400"
                 >
-                  Delete
+                  Edit
+                </Link>
+                <button
+                  onClick={() => remove(project)}
+                  disabled={deleting === project.id}
+                  className="text-[11px] uppercase tracking-[1.5px] text-[#8a2a2a] disabled:opacity-50"
+                >
+                  {deleting === project.id ? "Deleting…" : "Delete"}
                 </button>
               </div>
             </div>
