@@ -33,6 +33,7 @@ const tooltipStyle = {
   fontSize: 12,
   color: "#f6f4ef",
 };
+const legendText = (value: string) => <span style={{ color: NAVY_SOFT }}>{value}</span>;
 const tick = { fontSize: 11, fill: MUTED };
 
 const usd = (value: number) =>
@@ -65,6 +66,25 @@ function ChartCard({
   );
 }
 
+const PALETTE = ["#c9a35c", "#0a1a30", "#16304f", "#ecd7a8", "#8a6d33", "#6d7c92", "#b9873a", "#3b5a82", "#d9c28f", "#2a4466"];
+
+function Donut({ data }: { data: { label: string; percent: number }[] }) {
+  const rows = data.map((d) => ({ name: `${d.label} ${Number(d.percent)}%`, value: Number(d.percent) }));
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart>
+        <Pie data={rows} dataKey="value" nameKey="name" innerRadius="48%" outerRadius="82%" paddingAngle={2} stroke="none">
+          {rows.map((_, i) => (
+            <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+          ))}
+        </Pie>
+        <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => `${v}%`} />
+        <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}
+
 export default function ProjectCharts({ project }: { project: Project }) {
   const data = [...(project.stats || [])]
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -80,7 +100,19 @@ export default function ProjectCharts({ project }: { project: Project }) {
       };
     });
 
-  if (!data.length) {
+  const hasStats = data.length > 0;
+  const proceeds = (project.useOfProceeds || []).filter((a) => Number(a.percent) > 0);
+  const structure = (project.capitalStructure || []).filter((a) => Number(a.percent) > 0);
+  const tiers = project.ticketTiers || [];
+  const annualRate = Number(project.expectedReturn) / 100;
+  const horizonMonths = Math.max(1, Number(project.durationMonths) || 12);
+  const tierData = tiers.map((t) => ({
+    label: t.label,
+    invested: Number(t.amount),
+    projected: Math.round(Number(t.amount) * (1 + annualRate * (horizonMonths / 12))),
+  }));
+
+  if (!hasStats && !proceeds.length && !structure.length && !tierData.length) {
     return (
       <p className="text-sm text-muted-dark">
         Statistics will be published as this mandate progresses.
@@ -113,6 +145,36 @@ export default function ProjectCharts({ project }: { project: Project }) {
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
+      {proceeds.length > 0 && (
+        <ChartCard title="Use of proceeds" note="How the capital raised will be deployed">
+          <Donut data={proceeds} />
+        </ChartCard>
+      )}
+      {structure.length > 0 && (
+        <ChartCard title="Capital structure" note="Composition of the total financing">
+          <Donut data={structure} />
+        </ChartCard>
+      )}
+      {tierData.length > 0 && (
+        <ChartCard
+          title="Ticket tiers: invested vs projected"
+          note={`Illustrative value at maturity (${horizonMonths} months, ${Number(project.expectedReturn).toFixed(1)}% a year). Not a guarantee.`}
+          className="lg:col-span-2"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={tierData} margin={{ left: -8, right: 8 }}>
+              <CartesianGrid stroke="#efebe3" vertical={false} />
+              <XAxis dataKey="label" {...axisProps} />
+              <YAxis {...axisProps} tickFormatter={compact} width={52} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(201,163,92,0.08)" }} formatter={(v: number) => usd(v)} />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
+              <Bar dataKey="invested" name="Invested" fill={NAVY_SOFT} radius={[6, 6, 0, 0]} />
+              <Bar dataKey="projected" name="Projected at maturity" fill={GOLD} radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      )}
+      {hasStats && (<>
       <ChartCard title="Capital raised over time">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ left: -8, right: 8 }}>
@@ -149,7 +211,7 @@ export default function ProjectCharts({ project }: { project: Project }) {
               <Cell fill="#e8e2d4" />
             </Pie>
             <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => usd(v)} />
-            <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+            <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} formatter={legendText} />
             <text x="50%" y="46%" textAnchor="middle" dominantBaseline="middle" fill={NAVY} style={{ fontSize: 30, fontWeight: 600, fontFamily: "var(--font-cormorant)" }}>
               {progress}%
             </text>
@@ -216,6 +278,7 @@ export default function ProjectCharts({ project }: { project: Project }) {
           </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
+      </>)}
     </div>
   );
 }

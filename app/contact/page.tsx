@@ -41,6 +41,21 @@ const TYPES: { value: InquiryType; label: string }[] = [
   { value: "question", label: "Question" },
 ];
 
+const INVESTOR_TYPES = [
+  { value: "individual", label: "Individual investor" },
+  { value: "family_office", label: "Family office" },
+  { value: "fund", label: "Investment fund" },
+  { value: "corporate", label: "Corporate" },
+  { value: "institution", label: "Institution" },
+  { value: "other", label: "Other" },
+];
+const CONTACT_METHODS = [
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Phone call" },
+  { value: "whatsapp", label: "WhatsApp" },
+];
+const HORIZONS = ["Under 1 year", "1 to 3 years", "3 to 5 years", "More than 5 years"];
+
 const ACCEPTED = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv", "txt", "png", "jpg", "jpeg", "webp"];
 const MAX_FILES = 3;
 const MAX_TOTAL = 4 * 1024 * 1024;
@@ -61,7 +76,15 @@ function ContactForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
-  const [budget, setBudget] = useState("");
+  const [budget, setBudget] = useState(params.get("budget") || "");
+  const [jobTitle, setJobTitle] = useState("");
+  const [country, setCountry] = useState("");
+  const [investorType, setInvestorType] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [preferredContact, setPreferredContact] = useState("");
+  const [horizon, setHorizon] = useState("");
+  const [activities, setActivities] = useState("");
+  const [ticketTier, setTicketTier] = useState(params.get("ticket") || "");
   const [projectId, setProjectId] = useState(params.get("project") || "");
   const [message, setMessage] = useState("");
   const [website, setWebsite] = useState("");
@@ -71,6 +94,8 @@ function ContactForm() {
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
   const isInterest = type === "interest";
+  const selectedProject = projects.find((p) => p.id === projectId);
+  const tiers = selectedProject?.ticketTiers || [];
 
   useEffect(() => {
     api<Project[]>("/projects")
@@ -117,6 +142,14 @@ function ContactForm() {
       body.append("company", company);
       body.append("budget", budget);
       body.append("projectId", projectId);
+      body.append("jobTitle", jobTitle);
+      body.append("country", country);
+      body.append("investorType", investorType);
+      body.append("websiteUrl", websiteUrl);
+      body.append("preferredContact", preferredContact);
+      body.append("horizon", horizon);
+      body.append("activities", activities);
+      body.append("ticketTier", tiers.some((t) => t.label === ticketTier) ? ticketTier : "");
       body.append("message", message);
       body.append("website", website);
       body.append("startedAt", String(startedAt.current));
@@ -247,6 +280,50 @@ function ContactForm() {
                 className="field-input"
               />
             </label>
+            <label className="field-label">
+              Job title
+              <input
+                autoComplete="organization-title"
+                maxLength={120}
+                placeholder="Managing partner"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                className="field-input"
+              />
+            </label>
+            <label className="field-label">
+              Country
+              <input
+                autoComplete="country-name"
+                maxLength={100}
+                placeholder="Country of residence"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="field-input"
+              />
+            </label>
+            <label className="field-label">
+              Investor type
+              <select value={investorType} onChange={(e) => setInvestorType(e.target.value)} className="field-input">
+                <option value="">Select…</option>
+                {INVESTOR_TYPES.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field-label">
+              Website or LinkedIn
+              <input
+                type="url"
+                maxLength={300}
+                placeholder="https://linkedin.com/in/…"
+                value={websiteUrl}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+                className="field-input"
+              />
+            </label>
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -279,13 +356,64 @@ function ContactForm() {
                 className="field-input"
               />
             </label>
+            {tiers.length > 0 && (
+              <label className="field-label">
+                Ticket tier
+                <select value={ticketTier} onChange={(e) => setTicketTier(e.target.value)} className="field-input">
+                  <option value="">Custom amount</option>
+                  {tiers.map((t) => (
+                    <option key={t.label} value={t.label}>
+                      {t.label} · {Number(t.amount).toLocaleString("en-US")} USD
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <label className="field-label">
+              Investment horizon
+              <select value={horizon} onChange={(e) => setHorizon(e.target.value)} className="field-input">
+                <option value="">Select…</option>
+                {HORIZONS.map((h) => (
+                  <option key={h} value={h}>
+                    {h}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={`field-label ${tiers.length > 0 ? "sm:col-span-2" : ""}`}>
+              Preferred contact method
+              <select
+                value={preferredContact}
+                onChange={(e) => setPreferredContact(e.target.value)}
+                className="field-input"
+              >
+                <option value="">No preference</option>
+                {CONTACT_METHODS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <label className="field-label mt-5">
-            Message *
+            About your investment activities
             <textarea
-              required
-              minLength={5}
+              maxLength={3000}
+              rows={4}
+              placeholder="Sectors you invest in, typical deal size, track record…"
+              value={activities}
+              onChange={(e) => setActivities(e.target.value)}
+              className="field-input resize-y"
+            />
+          </label>
+
+          <label className="field-label mt-5">
+            Message{isInterest ? " (optional)" : " *"}
+            <textarea
+              required={!isInterest}
+              minLength={isInterest ? undefined : 5}
               maxLength={5000}
               rows={6}
               placeholder="Describe your interest, proposal or question…"
@@ -296,7 +424,7 @@ function ContactForm() {
           </label>
 
           <div className="mt-5">
-            <div className="field-label">Additional files</div>
+            <div className="field-label">Files about your activities (optional)</div>
             <label className="mt-2 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-gold-500/50 bg-[#fdfcfa] px-4 py-6 text-center transition-colors hover:border-gold-500 hover:bg-gold-500/[0.06]">
               <svg
                 viewBox="0 0 24 24"

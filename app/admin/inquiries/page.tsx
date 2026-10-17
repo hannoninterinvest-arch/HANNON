@@ -7,6 +7,16 @@ import StatusBadge from "@/components/StatusBadge";
 import { api, money } from "@/lib/api";
 import type { InquiryStatus, InquiryType, InvestorInquiry } from "@/lib/types";
 
+const INVESTOR_LABELS: Record<string, string> = {
+  individual: "Individual investor",
+  family_office: "Family office",
+  fund: "Investment fund",
+  corporate: "Corporate",
+  institution: "Institution",
+  other: "Other",
+};
+const CONTACT_LABELS: Record<string, string> = { email: "Email", phone: "Phone call", whatsapp: "WhatsApp" };
+
 export default function AdminInquiriesPage() {
   const [items, setItems] = useState<InvestorInquiry[]>([]);
   const [type, setType] = useState<"" | InquiryType>("");
@@ -136,6 +146,57 @@ export default function AdminInquiriesPage() {
                   <dd className="font-semibold text-gold-500">{money(item.budget)}</dd>
                 </div>
               )}
+              {item.jobTitle && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-dark">Job title</dt>
+                  <dd>{item.jobTitle}</dd>
+                </div>
+              )}
+              {item.country && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-dark">Country</dt>
+                  <dd>{item.country}</dd>
+                </div>
+              )}
+              {item.investorType && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-dark">Investor type</dt>
+                  <dd>{INVESTOR_LABELS[item.investorType] || item.investorType}</dd>
+                </div>
+              )}
+              {item.preferredContact && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-dark">Prefers</dt>
+                  <dd>{CONTACT_LABELS[item.preferredContact] || item.preferredContact}</dd>
+                </div>
+              )}
+              {item.horizon && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-dark">Horizon</dt>
+                  <dd>{item.horizon}</dd>
+                </div>
+              )}
+              {item.ticketTier && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-dark">Ticket tier</dt>
+                  <dd>{item.ticketTier}</dd>
+                </div>
+              )}
+              {item.websiteUrl && (
+                <div className="flex gap-2 sm:col-span-2">
+                  <dt className="text-muted-dark">Website</dt>
+                  <dd>
+                    <a
+                      href={item.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="break-all text-navy-900 hover:text-gold-500"
+                    >
+                      {item.websiteUrl}
+                    </a>
+                  </dd>
+                </div>
+              )}
               {item.projectTitle && (
                 <div className="flex gap-2 sm:col-span-2">
                   <dt className="text-muted-dark">Project</dt>
@@ -151,9 +212,23 @@ export default function AdminInquiriesPage() {
                 </div>
               )}
             </dl>
-            <p className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words text-sm leading-relaxed text-navy-800">
-              {item.message}
-            </p>
+            {item.activities && (
+              <div className="mt-3 rounded-xl border border-[#efebe3] bg-ivory px-4 py-3">
+                <div className="text-[10px] font-semibold uppercase tracking-[1.5px] text-gold-500">
+                  Investment activities
+                </div>
+                <p className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-words text-sm leading-relaxed text-navy-800">
+                  {item.activities}
+                </p>
+              </div>
+            )}
+            {item.message ? (
+              <p className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap break-words text-sm leading-relaxed text-navy-800">
+                {item.message}
+              </p>
+            ) : (
+              <p className="mt-3 text-sm italic text-muted-dark">No message provided.</p>
+            )}
             {item.attachments?.length > 0 && (
               <ul className="mt-4 flex flex-wrap gap-2">
                 {item.attachments.map((file) =>
