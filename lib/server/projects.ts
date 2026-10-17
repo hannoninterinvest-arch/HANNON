@@ -1,6 +1,6 @@
-import { one, query } from "./db";
+import { getPool, one, query } from "./db";
 import { has, HttpError, isUuid } from "./http";
-import { destroyImage, normalizePublicId, readImage, uploadBuffer } from "./media";
+import { destroyImage, normalizeDriveLink, normalizePublicId, readImage, uploadBuffer } from "./media";
 import { slugify } from "./slug";
 import type { NextRequest } from "next/server";
 
@@ -8,7 +8,7 @@ type Row = Record<string, unknown>;
 
 const PROJECT_COLUMNS = `id, title, slug, description, summary, sector, location, "imageUrl",
   "cloudinaryPublicId", "targetAmount", "raisedAmount", "minInvestment", "expectedReturn",
-  "durationMonths", status, visible, highlights, "createdAt", "updatedAt"`;
+  "durationMonths", status, visible, highlights, "presentationUrl", "createdAt", "updatedAt"`;
 
 function highlightsOf(value: unknown) {
   if (value == null || value === "") return value == null ? null : [];
@@ -18,7 +18,7 @@ function highlightsOf(value: unknown) {
     .filter(Boolean);
 }
 
-function shapeProject(row: Row, stats: Row[]) {
+function shapeProject(row: Row, stats: Row[]): Record<string, any> {
   return {
     ...row,
     highlights: highlightsOf(row.highlights),
@@ -162,8 +162,8 @@ export async function createProject(body: Record<string, unknown>) {
     `INSERT INTO projects
       (title, slug, description, summary, sector, location, "imageUrl", "cloudinaryPublicId",
        "targetAmount", "raisedAmount", "minInvestment", "expectedReturn", "durationMonths",
-       status, visible, highlights)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       status, visible, highlights, "presentationUrl")
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
      RETURNING id`,
     [
       title,
@@ -182,6 +182,7 @@ export async function createProject(body: Record<string, unknown>) {
       optionalStatus(body.status, "open"),
       body.visible === undefined ? true : Boolean(body.visible),
       highlightsText(body.highlights),
+      normalizeDriveLink(body.presentationUrl),
     ],
   );
   const stats = Array.isArray(body.stats) && body.stats.length
@@ -224,6 +225,9 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
     status: has(body, "status") ? optionalStatus(body.status) : current.status,
     visible: has(body, "visible") ? Boolean(body.visible) : current.visible,
     highlights: has(body, "highlights") ? highlightsText(body.highlights) : null,
+    presentationUrl: has(body, "presentationUrl")
+      ? normalizeDriveLink(body.presentationUrl)
+      : current.presentationUrl,
   };
   if (has(body, "slug") && next.slug !== current.slug) {
     const clash = await one(`SELECT id FROM projects WHERE slug = $1 AND id <> $2`, [next.slug, id]);
@@ -234,7 +238,8 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       title = $2, slug = $3, description = $4, summary = $5, sector = $6, location = $7,
       "imageUrl" = $8, "cloudinaryPublicId" = $9, "targetAmount" = $10, "raisedAmount" = $11,
       "minInvestment" = $12, "expectedReturn" = $13, "durationMonths" = $14, status = $15,
-      visible = $16, highlights = CASE WHEN $17 THEN $18 ELSE highlights END, "updatedAt" = now()
+      visible = $16, highlights = CASE WHEN $17 THEN $18 ELSE highlights END,
+      "presentationUrl" = $19, "updatedAt" = now()
      WHERE id = $1`,
     [
       id,
@@ -255,6 +260,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       next.visible,
       has(body, "highlights"),
       next.highlights,
+      next.presentationUrl,
     ],
   );
   if (has(body, "stats")) {
@@ -266,8 +272,21 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
 
 export async function removeProject(id: string) {
   const project = await getProject(id, false);
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(`DELETE FROM project_stats WHERE "projectId" = $1`, [id]);
+    await client.query(`DELETE FROM investment_requests WHERE "projectId" = $1`, [id]);
+    await client.query(`UPDATE investor_inquiries SET "projectId" = NULL WHERE "projectId" = $1`, [id]);
+    await client.query(`DELETE FROM projects WHERE id = $1`, [id]);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
   await destroyImage(project.cloudinaryPublicId as string | null);
-  await query(`DELETE FROM projects WHERE id = $1`, [id]);
   return { deleted: true };
 }
 
