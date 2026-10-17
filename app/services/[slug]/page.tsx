@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { HannonService, ServicePlatform } from "@/lib/types";
+import ServiceOverview from "@/components/ServiceOverview";
 
 function platformImages(platform: ServicePlatform) {
   return [platform.imageUrl, platform.secondImageUrl].filter(
@@ -17,7 +18,7 @@ function PlatformBlock({ platform }: { platform: ServicePlatform }) {
   const images = platformImages(platform);
 
   return (
-    <article className="card-shadow overflow-hidden rounded-2xl bg-white">
+    <article id={`platform-${platform.id}`} className="card-shadow scroll-mt-28 overflow-hidden rounded-2xl bg-white">
       {images.length === 1 && (
         <div className="relative h-72 w-full">
           <Image
@@ -112,7 +113,7 @@ export default function ServiceDetailPage() {
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/70 to-navy-900/25 sm:bg-gradient-to-r sm:via-navy-900/75 sm:to-navy-900/20" />
-          <div className="relative z-[1] mx-auto flex h-full max-w-wrap flex-col justify-end px-6 pb-10 lg:px-10">
+          <div className="relative z-[1] mx-auto flex h-full max-w-wrap flex-col justify-end px-6 pb-16 sm:pb-20 lg:px-10">
             <Link
               href="/services"
               className="mb-4 text-[11px] font-semibold uppercase tracking-[2px] text-gold-400 transition-colors hover:text-gold-300"
@@ -124,7 +125,7 @@ export default function ServiceDetailPage() {
         </div>
       ) : (
         <div className="bg-navy-900">
-          <div className="mx-auto max-w-wrap px-6 py-16 lg:px-10">
+          <div className="mx-auto max-w-wrap px-6 pb-24 pt-16 lg:px-10">
             <Link
               href="/services"
               className="text-[11px] uppercase tracking-[2px] text-gold-400"
@@ -136,23 +137,23 @@ export default function ServiceDetailPage() {
         </div>
       )}
 
-      <div className="mx-auto max-w-wrap space-y-8 px-6 py-10 lg:px-10">
+      <div className="relative z-[2] mx-auto -mt-12 max-w-wrap space-y-10 px-6 pb-10 sm:-mt-14 lg:px-10">
         {service.description ? (
-          <section className="card-shadow rounded-2xl bg-white p-6 sm:p-8">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
-              Overview
-            </h2>
-            <p className="mt-4 whitespace-pre-line text-[15px] font-light leading-relaxed text-navy-800">
-              {service.description}
-            </p>
-          </section>
+          <ServiceOverview
+            name={service.name}
+            description={service.description}
+            platforms={service.platforms || []}
+          />
         ) : null}
 
         {service.platforms?.length ? (
           <section className="space-y-6">
-            <h2 className="font-serif text-3xl text-navy-900">
-              Platforms & features
-            </h2>
+            <div>
+              <div className="eyebrow">Platforms</div>
+              <h2 className="display mt-3 text-[30px] text-navy-900 sm:text-4xl">
+                Platforms &amp; <span className="gold-text">features</span>
+              </h2>
+            </div>
             {service.platforms.map((platform) => (
               <PlatformBlock key={platform.id} platform={platform} />
             ))}
