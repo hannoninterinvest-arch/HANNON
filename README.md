@@ -109,3 +109,7 @@ Le schéma est appliqué au premier appel API : tables créées seulement si ell
 
 - Titres : **Cormorant Garamond**
 - Corps : **Jost**
+
+## SEO et référencement
+
+La configuration SEO (métadonnées, JSON-LD, sitemap, robots, favicons, redirections www) et la procédure Google Search Console sont décrites dans [`docs/SEO.md`](docs/SEO.md).

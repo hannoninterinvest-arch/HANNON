@@ -1,9 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
   { href: "/projects", label: "Projects" },
   { href: "/services", label: "Services" },
+  { href: "/global-reach", label: "Global Reach" },
   { href: "/contact", label: "Contact" },
   { href: "/login", label: "Administration" },
 ];
@@ -40,7 +43,7 @@ export default function Footer() {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent" />
       <div className="section-pad mx-auto grid max-w-wrap grid-cols-1 gap-10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_0.8fr_1fr_1.5fr] lg:gap-12">
         <div>
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3" aria-label="HANNON International Investments - home">
             <div className="relative h-12 w-12 shrink-0">
               <Image
                 src="https://res.cloudinary.com/dbzweuzla/image/upload/v1786402383/logoha_lpe5ct.webp"
@@ -58,7 +61,7 @@ export default function Footer() {
                 International Investments Ltd
               </div>
             </div>
-          </a>
+          </Link>
           <p className="mt-6 font-serif text-[22px] font-medium leading-snug text-white/90">
             Structuring Sovereign Capital.
             <br />
@@ -82,12 +85,13 @@ export default function Footer() {
           <ul>
             {QUICK_LINKS.map((link) => (
               <li key={link.href} className="mb-3">
-                <a
+                <Link
                   href={link.href}
+                  rel={link.href === "/login" ? "nofollow" : undefined}
                   className="inline-block text-[13px] font-light text-muted transition-all hover:translate-x-1 hover:text-gold-400"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -100,12 +104,13 @@ export default function Footer() {
           <ul>
             {SERVICE_LINKS.map((link) => (
               <li key={link.href} className="mb-3">
-                <a
+                <Link
                   href={link.href}
+                  rel={link.href === "/login" ? "nofollow" : undefined}
                   className="inline-block text-[13px] font-light text-muted transition-all hover:translate-x-1 hover:text-gold-400"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -146,12 +151,12 @@ export default function Footer() {
             }
           >
             <a
-              href="https://www.hannoninterinvest.com"
+              href="https://hannoninterinvest.com"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-gold-400"
             >
-              www.hannoninterinvest.com
+              hannoninterinvest.com
             </a>
           </ContactRow>
           <ContactRow

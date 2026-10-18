@@ -89,7 +89,7 @@ export default function GlobalReach() {
                 Managing Director
               </div>
               <p className="text-[14px] font-light leading-[1.8] text-muted">
-                Riadh Ibn Chaouaa leads HANNON Sovereign Capital Advisory with a focus on sovereign
+                Riadh Ibn Chaouaa leads HANNON International Investments with a focus on sovereign
                 financial strategy, capital structuring, and international deal execution. He
                 brings deep expertise in cross-border transactions and institutional advisory, with
                 a strong track record of delivering innovative financing solutions for high-impact

@@ -1,15 +1,18 @@
 import type { ReactNode } from "react";
+import Breadcrumbs, { type Crumb } from "./Breadcrumbs";
 
 export default function PageHeader({
   eyebrow,
   title,
   description,
   children,
+  crumbs,
 }: {
   eyebrow: string;
   title: ReactNode;
   description?: string;
   children?: ReactNode;
+  crumbs?: Crumb[];
 }) {
   return (
     <section className="relative overflow-hidden bg-navy-900 text-white">
@@ -22,6 +25,7 @@ export default function PageHeader({
       />
       <div className="grid-pattern pointer-events-none absolute inset-0" />
       <div className="section-pad relative mx-auto max-w-wrap py-14 sm:py-20">
+        {crumbs && <Breadcrumbs items={crumbs} className="mb-6" />}
         <div className="eyebrow anim-fade-up text-gold-400">{eyebrow}</div>
         <h1
           className="display anim-fade-up mt-4 max-w-3xl text-[38px] sm:text-5xl lg:text-[58px]"

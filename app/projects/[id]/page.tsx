@@ -1,14 +1,53 @@
-"use client";
-
-import { ReactNode, useEffect, useState } from "react";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { api, money, pct, progressOf } from "@/lib/api";
-import type { Project, RiskLevel } from "@/lib/types";
+import { money, pct, progressOf } from "@/lib/api";
+import type { RiskLevel } from "@/lib/types";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
+import ProjectCard from "@/components/ProjectCard";
 import ProjectCharts from "@/components/ProjectCharts";
 import TicketCalculator from "@/components/TicketCalculator";
 import { driveLinks } from "@/lib/drive";
+import {
+  SITE_NAME,
+  breadcrumbJsonLd,
+  pageMetadata,
+  plainText,
+  projectJsonLd,
+  socialImage,
+  truncate,
+} from "@/lib/seo";
+import { getPublicProject, getPublishedServices, getVisibleProjects } from "@/lib/server/publicData";
+
+export const dynamic = "force-dynamic";
+
+type Params = { params: { id: string } };
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const project = await getPublicProject(params.id);
+  const sector = plainText(project.sector);
+  const candidates = [
+    `${project.title} | ${sector} Investment Project | HANNON`,
+    `${project.title} | ${sector} Project | HANNON`,
+    `${project.title} | HANNON Projects`,
+  ];
+  const title = candidates.find((t) => t.length <= 65) ?? `${truncate(project.title, 48)} | HANNON`;
+  const intro = plainText(project.summary || project.description);
+  const description = truncate(
+    intro.length >= 110
+      ? intro
+      : `${intro ? `${intro} ` : ""}${sector} investment project in ${plainText(project.location)} presented by ${SITE_NAME}.`,
+    160,
+  );
+  return pageMetadata({
+    title,
+    description,
+    path: `/projects/${project.id}`,
+    image: socialImage(project.imageUrl, project.title),
+  });
+}
 
 const RISK: Record<RiskLevel, { label: string; className: string; bars: number }> = {
   low: { label: "Low risk", className: "bg-[#e5f2ea] text-[#1f6b3a]", bars: 1 },
@@ -46,23 +85,19 @@ function Section({
   );
 }
 
-export default function ProjectDetailPage() {
-  const params = useParams<{ id: string }>();
-  const [project, setProject] = useState<Project | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    api<Project>(`/projects/${params.id}`)
-      .then(setProject)
-      .catch((e) => setError(e.message));
-  }, [params.id]);
-
-  if (error) {
-    return <main className="px-6 py-24 text-center text-muted-dark">{error}</main>;
-  }
-  if (!project) {
-    return <main className="px-6 py-24 text-center text-muted-dark">Loading project…</main>;
-  }
+export default async function ProjectDetailPage({ params }: Params) {
+  const project = await getPublicProject(params.id);
+  const [allProjects, allServices] = await Promise.all([getVisibleProjects(), getPublishedServices()]);
+  const related = [
+    ...allProjects.filter((p) => p.id !== project.id && p.sector === project.sector),
+    ...allProjects.filter((p) => p.id !== project.id && p.sector !== project.sector),
+  ].slice(0, 3);
+  const relatedServices = allServices.slice(0, 4);
+  const crumbs = [
+    { name: "Home", href: "/" },
+    { name: "Projects", href: "/projects" },
+    { name: project.title, href: `/projects/${project.id}` },
+  ];
 
   const progress = progressOf(project.raisedAmount, project.targetAmount);
   const remaining = Math.max(0, Number(project.targetAmount) - Number(project.raisedAmount));
@@ -117,7 +152,13 @@ export default function ProjectDetailPage() {
   ].filter((n) => n[2]) as [string, string, boolean][];
 
   return (
-    <main className="bg-ivory pb-20">
+    <main id="main-content" className="bg-ivory pb-20">
+      <JsonLd
+        data={[
+          projectJsonLd(project),
+          breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.name, path: crumb.href }))),
+        ]}
+      />
       <div className="relative h-[340px] w-full overflow-hidden bg-navy-900 sm:h-[440px]">
         {project.imageUrl && (
           <Image
@@ -131,12 +172,7 @@ export default function ProjectDetailPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/70 to-navy-900/25 sm:bg-gradient-to-r sm:via-navy-900/75 sm:to-navy-900/20" />
         <div className="section-pad relative z-[1] mx-auto flex h-full max-w-wrap flex-col justify-end pb-12">
-          <Link
-            href="/projects"
-            className="mb-4 text-[11px] font-semibold uppercase tracking-[2px] text-gold-400 transition-colors hover:text-gold-300"
-          >
-            ← All projects
-          </Link>
+          <Breadcrumbs items={crumbs} className="mb-4" />
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-gold-500 px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[1.5px] text-navy-900">
               {STATUS[project.status] || project.status}
@@ -457,6 +493,39 @@ export default function ProjectDetailPage() {
             </div>
           </aside>
         </div>
+
+        {(related.length > 0 || relatedServices.length > 0) && (
+          <section aria-labelledby="related-heading" className="pt-16">
+            <div className="eyebrow">Keep exploring</div>
+            <h2 id="related-heading" className="mb-6 mt-2 font-serif text-3xl font-semibold text-navy-900 sm:text-4xl">
+              {related.length > 0 ? "Related investment projects" : "HANNON services"}
+            </h2>
+            {related.length > 0 && (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+                {related.map((item) => (
+                  <ProjectCard key={item.id} project={item} />
+                ))}
+              </div>
+            )}
+            <p className="mt-8 text-[15px] font-light leading-relaxed text-navy-800">
+              <Link href="/projects" className="text-gold-500 underline underline-offset-4">
+                All investment projects
+              </Link>
+              {relatedServices.map((service) => (
+                <span key={service.id}>
+                  {" · "}
+                  <Link href={`/services/${service.slug}`} className="text-gold-500 underline underline-offset-4">
+                    {service.name}
+                  </Link>
+                </span>
+              ))}
+              {" · "}
+              <Link href="/about" className="text-gold-500 underline underline-offset-4">
+                About HANNON
+              </Link>
+            </p>
+          </section>
+        )}
       </div>
     </main>
   );

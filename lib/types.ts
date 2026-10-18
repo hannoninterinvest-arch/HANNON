@@ -66,6 +66,7 @@ export type Project = {
   risks: string[];
   stats: ProjectStat[];
   createdAt: string;
+  updatedAt?: string;
 };
 
 export type InvestmentRequest = {

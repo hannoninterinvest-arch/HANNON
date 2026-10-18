@@ -8,10 +8,10 @@ import { useAuth } from "@/lib/auth";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/#about", label: "About" },
+  { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/projects", label: "Projects" },
-  { href: "/#reach", label: "Global Reach" },
+  { href: "/global-reach", label: "Global Reach" },
 ];
 
 function isActive(href: string, pathname: string) {

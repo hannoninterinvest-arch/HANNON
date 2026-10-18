@@ -1,23 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import { HOME_PROJECTS, pickHome } from "@/lib/home";
 import ProjectCard from "./ProjectCard";
 import Reveal from "./Reveal";
 
-export default function ProjectsSection() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    api<Project[]>("/projects")
-      .then(setProjects)
-      .catch(() => setError("Investment opportunities will appear once the API is connected."));
-  }, []);
-
+export default function ProjectsSection({ projects }: { projects: Project[] }) {
   return (
     <section id="projects" className="relative bg-ivory py-16 sm:py-24">
       <div className="section-pad mx-auto max-w-wrap">
@@ -35,9 +22,9 @@ export default function ProjectsSection() {
           </Link>
         </Reveal>
 
-        {error && (
-          <p className="rounded-2xl border border-gold-500/30 bg-white px-5 py-4 text-sm text-muted-dark">
-            {error}
+        {projects.length === 0 && (
+          <p className="rounded-2xl border border-dashed border-gold-500/40 bg-white px-6 py-10 text-center text-sm font-light text-muted-dark">
+            Investment opportunities will be published here.
           </p>
         )}
 

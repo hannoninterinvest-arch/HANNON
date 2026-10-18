@@ -1,23 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
 import type { HannonService } from "@/lib/types";
 import { HOME_SERVICES, pickHome } from "@/lib/home";
 import Reveal from "./Reveal";
 import ServiceCard from "./ServiceCard";
 
-export default function Services() {
-  const [services, setServices] = useState<HannonService[]>([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    api<HannonService[]>("/services")
-      .then(setServices)
-      .catch(() => setError("Services will be displayed as soon as the API is available."));
-  }, []);
-
+export default function Services({ services }: { services: HannonService[] }) {
   return (
     <section id="services" className="relative bg-white py-16 sm:py-24">
       <div className="section-pad mx-auto max-w-wrap">
@@ -37,8 +24,7 @@ export default function Services() {
           </p>
         </Reveal>
 
-        {error && <p className="mb-4 text-sm text-muted-dark">{error}</p>}
-        {!error && services.length === 0 && (
+        {services.length === 0 && (
           <p className="rounded-2xl border border-dashed border-gold-500/40 bg-ivory px-6 py-10 text-center text-sm font-light text-muted-dark">
             Published services will appear here.
           </p>

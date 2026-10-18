@@ -58,29 +58,27 @@ export default function Hero() {
 
       <div className="section-pad mx-auto flex min-h-[calc(100svh-72px)] max-w-wrap flex-col justify-center pb-10 pt-14 sm:pt-20 lg:min-h-[640px] lg:pt-24">
         <div className="max-w-[720px]">
-          <div className="anim-fade-up inline-flex items-center gap-2.5 rounded-full border border-gold-500/40 bg-gold-500/10 px-4 py-2 text-[10.5px] font-semibold uppercase tracking-[2.5px] text-gold-300 backdrop-blur-sm sm:text-[11px]">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold-400 shadow-[0_0_10px_#dcb977]" />
-            Sovereign Capital Advisory
-          </div>
-
-          <h1
-            className="display anim-fade-up mt-6 text-[44px] uppercase sm:text-[64px] lg:text-[78px]"
-            style={{ animationDelay: "120ms" }}
-          >
-            Structuring
-            <br />
-            <span className="gold-text">Sovereign Capital.</span>
-            <br />
-            <span className="text-white/95">Delivering Global Impact.</span>
+          <h1 className="anim-fade-up mt-0" style={{ animationDelay: "120ms" }}>
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-gold-500/40 bg-gold-500/10 px-4 py-2 font-sans text-[10.5px] font-semibold uppercase leading-normal tracking-[2.5px] text-gold-300 backdrop-blur-sm sm:text-[11px]">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold-400 shadow-[0_0_10px_#dcb977]" />
+              HANNON International Investments
+            </span>
+            <span className="display mt-6 block text-[44px] uppercase sm:text-[64px] lg:text-[78px]">
+              Structuring
+              <br />
+              <span className="gold-text">Sovereign Capital.</span>
+              <br />
+              <span className="text-white/95">Delivering Global Impact.</span>
+            </span>
           </h1>
 
           <p
             className="anim-fade-up mt-6 max-w-[540px] text-[15px] font-light leading-[1.85] text-[#b9c6d8] sm:text-[17px]"
             style={{ animationDelay: "240ms" }}
           >
-            HANNON INTERNATIONAL INVESTMENTS LTD is an independent financial advisory firm
-            specializing in sovereign financing, capital structuring, and access to
-            international funding for governments and global enterprises.
+            HANNON International Investments is a Tunisia-based international investment and
+            project development company connecting investors, industrial partners and
+            innovative businesses across global markets.
           </p>
 
           <div

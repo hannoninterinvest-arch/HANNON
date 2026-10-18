@@ -486,9 +486,13 @@ function ContactForm() {
 
 export default function ContactPage() {
   return (
-    <main>
+    <main id="main-content">
       <PageHeader
         eyebrow="Contact"
+        crumbs={[
+          { name: "Home", href: "/" },
+          { name: "Contact", href: "/contact" },
+        ]}
         title={
           <>
             Share your <span className="gold-text">interest</span>, proposal or question

@@ -31,7 +31,7 @@ const TRUST_ITEMS = [
 
 export default function TrustBar() {
   return (
-    <div id="about" className="relative border-b border-white/[0.06] bg-navy-800">
+    <div className="relative border-b border-white/[0.06] bg-navy-800">
       <div className="section-pad mx-auto max-w-wrap py-9 sm:py-10">
         <Reveal>
           <div className="mb-7 flex items-center gap-4 lg:hidden">
