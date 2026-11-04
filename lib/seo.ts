@@ -6,9 +6,9 @@ export const LEGAL_NAME = "HANNON INTERNATIONAL INVESTMENTS";
 export const SHORT_NAME = "HANNON";
 export const TAGLINE = "Structuring Sovereign Capital. Delivering Global Impact.";
 
-export const HOME_TITLE = "HANNON International Investments | Investment & Global Projects";
+export const HOME_TITLE = "حانون للإستثمارات العالمية | الاستثمار وتطوير المشاريع";
 export const HOME_DESCRIPTION =
-  "HANNON International Investments is a Tunisia-based international investment and project development company connecting investors, industrial partners and innovative businesses across global markets.";
+  "حانون للإستثمارات العالمية شركة تونسية للاستثمار وتطوير المشاريع، تربط المستثمرين والشركاء الصناعيين ومزودي التكنولوجيا في تونس وإفريقيا والأسواق الدولية.";
 
 export const CONTACT = {
   email: "contact@hannoninterinvest.com",
