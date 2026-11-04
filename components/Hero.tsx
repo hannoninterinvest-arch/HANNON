@@ -15,8 +15,10 @@ export default function Hero() {
     <div className="section-pad mx-auto flex min-h-[680px] max-w-wrap flex-col justify-center pb-12 pt-16 sm:min-h-[740px] sm:pt-20">
       <div className="max-w-[850px]">
         <div className="anim-fade-up inline-flex items-center gap-2.5 rounded-full border border-[#d8af6a]/45 bg-[#d8af6a]/10 px-4 py-2 text-[11px] font-semibold tracking-wide text-[#f0d29b] backdrop-blur">{t("heroEyebrow")}<span className="h-1.5 w-1.5 rounded-full bg-[#d8af6a] shadow-[0_0_12px_#d8af6a]"/></div>
-        <h1 className="anim-fade-up mt-7 max-w-[820px] font-serif text-[42px] font-semibold leading-[1.2] tracking-tight text-white sm:text-[58px] lg:text-[72px]" style={{animationDelay:"120ms"}}>
-          {t("heroTitle")}
+        <h1 className="mt-7 max-w-[850px] font-serif text-[40px] font-semibold leading-[1.22] tracking-tight text-white sm:text-[56px] lg:text-[70px]">
+          <span className="hero-title-line hero-title-first block">{t("heroTitleTop")}</span>
+          <span className="hero-title-line hero-title-second mt-1 block text-[#f0d29b]">{t("heroTitleGold")}</span>
+          <span aria-hidden className="hero-title-rule mt-5 block h-[3px] w-20 rounded-full bg-gradient-to-r from-[#f0d29b] to-[#d8af6a] sm:w-24"/>
         </h1>
         <p className="anim-fade-up mt-6 max-w-[640px] text-[16px] font-light leading-[1.95] text-white/75 sm:text-[18px]" style={{animationDelay:"240ms"}}>{t("heroBody")}</p>
         <div className="anim-fade-up mt-9 flex flex-col gap-3 sm:flex-row" style={{animationDelay:"340ms"}}>
