@@ -230,3 +230,18 @@ body {
     animation: none;
   }
 }
+
+
+/* Premium project motion and Arabic type fallback */
+.project-marquee { overflow: hidden; }
+.project-marquee-track { display: flex; width: max-content; animation: project-drift 48s linear infinite; }
+.project-marquee:hover .project-marquee-track { animation-play-state: paused; }
+.project-card img { transition: transform 700ms cubic-bezier(.16,1,.3,1); }
+.project-card:hover img { transform: scale(1.045); }
+@keyframes project-drift { to { transform: translateX(-50%); } }
+html[lang="ar"] body { font-family: Tahoma, Arial, sans-serif; }
+html[lang="ar"] .font-serif { font-family: "Noto Naskh Arabic", "Times New Roman", serif; }
+@media (prefers-reduced-motion: reduce) {
+  .project-marquee-track { animation: none; }
+  .project-card img { transition: none; }
+}
