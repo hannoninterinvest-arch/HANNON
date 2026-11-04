@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import PremiumNavbar from "@/components/PremiumNavbar";
+import MarketTicker from "@/components/MarketTicker";
 import PremiumFooter from "@/components/PremiumFooter";
 import { HOME_DESCRIPTION, HOME_TITLE, INDEXABLE, OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo";
 
@@ -24,6 +25,6 @@ export const viewport: Viewport = { themeColor: "#061439", width: "device-width"
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return <html lang="ar" dir="rtl" className={`${cormorant.variable} ${jost.variable}`}><body className="bg-white font-sans text-navy-900">
     <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-gold-500 focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-navy-900">انتقل إلى المحتوى الرئيسي</a>
-    <AuthProvider><LocaleProvider><PremiumNavbar />{children}<PremiumFooter /></LocaleProvider></AuthProvider>
+    <AuthProvider><LocaleProvider><MarketTicker /><PremiumNavbar />{children}<PremiumFooter /></LocaleProvider></AuthProvider>
   </body></html>;
 }
