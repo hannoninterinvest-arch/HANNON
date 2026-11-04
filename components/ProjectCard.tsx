@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { money, pct, progressOf } from "@/lib/api";
 import type { Project } from "@/lib/types";
+import { useLocale } from "./LocaleProvider";
 
 export default function ProjectCard({ project }: { project: Project }) {
+  const { t } = useLocale();
   const progress = progressOf(project.raisedAmount, project.targetAmount);
 
   return (
@@ -43,7 +45,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 
         <div className="mt-6 rounded-xl bg-ivory p-4">
           <div className="mb-2 flex justify-between text-[11px] font-medium uppercase tracking-[1px] text-muted-dark">
-            <span>Capital raised</span>
+            <span>{t("capitalRaised")}</span>
             <span className="font-semibold text-navy-800">{progress}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-[#e8e2d4]">
