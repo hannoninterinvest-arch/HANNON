@@ -1,133 +1,35 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-
-const PILLARS = [
-  {
-    title: "Sovereign Financing",
-    text: "Funding strategies for governments and institutions.",
-    icon: <path d="M3 21h18M4 21V9l8-5 8 5v12M9 21v-6h6v6M6 21V11M18 21V11" />,
-  },
-  {
-    title: "Capital Structuring",
-    text: "Robust structures for complex, high-impact transactions.",
-    icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
-  },
-  {
-    title: "International Funding",
-    text: "Access to global investors and financial institutions.",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M3 12h18M12 3c2.5 2.6 4 5.7 4 9s-1.5 6.4-4 9c-2.5-2.6-4-5.7-4-9s1.5-6.4 4-9z" />
-      </>
-    ),
-  },
-];
+import { useLocale } from "./LocaleProvider";
 
 export default function Hero() {
-  return (
-    <section id="home" className="relative isolate overflow-hidden bg-navy-900 text-white">
-      <Image
-        src="https://res.cloudinary.com/dbzweuzla/image/upload/v1786386096/630292ea-2558-499a-b414-3180fabd058b.jfif_2K_202608101920_asse86.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="-z-30 object-cover object-[70%_center]"
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 -z-20 lg:opacity-60"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(5,13,26,0.55) 0%, rgba(5,13,26,0.82) 60%, #050d1a 100%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 -z-20 hidden lg:block"
-        style={{
-          background:
-            "linear-gradient(90deg, #050d1a 0%, rgba(5,13,26,0.9) 30%, rgba(5,13,26,0.45) 62%, rgba(5,13,26,0.05) 100%)",
-        }}
-      />
-      <div className="grid-pattern pointer-events-none absolute inset-0 -z-10" />
-      <div
-        className="anim-float pointer-events-none absolute -right-24 top-10 -z-10 h-[420px] w-[420px] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(201,163,92,0.28), transparent 70%)" }}
-      />
-
-      <div className="section-pad mx-auto flex min-h-[calc(100svh-72px)] max-w-wrap flex-col justify-center pb-10 pt-14 sm:pt-20 lg:min-h-[640px] lg:pt-24">
-        <div className="max-w-[720px]">
-          <h1 className="anim-fade-up mt-0" style={{ animationDelay: "120ms" }}>
-            <span className="inline-flex items-center gap-2.5 rounded-full border border-gold-500/40 bg-gold-500/10 px-4 py-2 font-sans text-[10.5px] font-semibold uppercase leading-normal tracking-[2.5px] text-gold-300 backdrop-blur-sm sm:text-[11px]">
-              <span className="h-1.5 w-1.5 rounded-full bg-gold-400 shadow-[0_0_10px_#dcb977]" />
-              HANNON International Investments
-            </span>
-            <span className="display mt-6 block text-[44px] uppercase sm:text-[64px] lg:text-[78px]">
-              Structuring
-              <br />
-              <span className="gold-text">Sovereign Capital.</span>
-              <br />
-              <span className="text-white/95">Delivering Global Impact.</span>
-            </span>
-          </h1>
-
-          <p
-            className="anim-fade-up mt-6 max-w-[540px] text-[15px] font-light leading-[1.85] text-[#b9c6d8] sm:text-[17px]"
-            style={{ animationDelay: "240ms" }}
-          >
-            HANNON International Investments is a Tunisia-based international investment and
-            project development company connecting investors, industrial partners and
-            innovative businesses across global markets.
-          </p>
-
-          <div
-            className="anim-fade-up mt-9 flex flex-col gap-3.5 sm:flex-row"
-            style={{ animationDelay: "360ms" }}
-          >
-            <Link href="/projects" className="btn btn-gold">
-              Explore Projects <span aria-hidden>→</span>
-            </Link>
-            <Link href="/contact" className="btn btn-outline">
-              Send a proposal
-            </Link>
-          </div>
-        </div>
-
-        <div
-          className="anim-fade-up mt-14 grid grid-cols-1 gap-3 sm:mt-16 sm:grid-cols-3 sm:gap-4"
-          style={{ animationDelay: "500ms" }}
-        >
-          {PILLARS.map((p) => (
-            <div
-              key={p.title}
-              className="glass group flex items-start gap-4 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 hover:bg-white/[0.1]"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold-500/15 text-gold-400 transition-colors group-hover:bg-gold-500 group-hover:text-navy-900">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-[22px] w-[22px]"
-                >
-                  {p.icon}
-                </svg>
-              </span>
-              <div>
-                <div className="text-[12px] font-semibold uppercase tracking-[1.8px] text-white">
-                  {p.title}
-                </div>
-                <p className="mt-1.5 text-[13px] font-light leading-[1.6] text-muted">{p.text}</p>
-              </div>
-            </div>
-          ))}
+  const { t } = useLocale();
+  const pillars = [["pillar1","pillar1Body","01"],["pillar2","pillar2Body","02"],["pillar3","pillar3Body","03"]] as const;
+  return <section id="home" className="relative isolate overflow-hidden bg-[#061439] text-white">
+    <Image src="https://res.cloudinary.com/dbzweuzla/image/upload/v1786386096/630292ea-2558-499a-b414-3180fabd058b.jfif_2K_202608101920_asse86.jpg" alt="" fill priority sizes="100vw" className="-z-30 object-cover object-[70%_center]"/>
+    <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(6,20,57,.97)_0%,rgba(6,20,57,.84)_42%,rgba(6,20,57,.40)_100%)]"/>
+    <div className="grid-pattern pointer-events-none absolute inset-0 -z-10 opacity-70"/>
+    <div className="pointer-events-none absolute -right-24 top-10 -z-10 h-[440px] w-[440px] rounded-full bg-[#d8af6a]/20 blur-3xl"/>
+    <div className="section-pad mx-auto flex min-h-[680px] max-w-wrap flex-col justify-center pb-12 pt-16 sm:min-h-[740px] sm:pt-20">
+      <div className="max-w-[850px]">
+        <div className="anim-fade-up inline-flex items-center gap-2.5 rounded-full border border-[#d8af6a]/45 bg-[#d8af6a]/10 px-4 py-2 text-[11px] font-semibold tracking-wide text-[#f0d29b] backdrop-blur">{t("heroEyebrow")}<span className="h-1.5 w-1.5 rounded-full bg-[#d8af6a] shadow-[0_0_12px_#d8af6a]"/></div>
+        <h1 className="anim-fade-up mt-7 max-w-[820px] font-serif text-[42px] font-semibold leading-[1.2] tracking-tight text-white sm:text-[58px] lg:text-[72px]" style={{animationDelay:"120ms"}}>
+          {t("heroTitle")}
+        </h1>
+        <p className="anim-fade-up mt-6 max-w-[640px] text-[16px] font-light leading-[1.95] text-white/75 sm:text-[18px]" style={{animationDelay:"240ms"}}>{t("heroBody")}</p>
+        <div className="anim-fade-up mt-9 flex flex-col gap-3 sm:flex-row" style={{animationDelay:"340ms"}}>
+          <Link href="/projects" className="btn btn-gold">{t("explore")} <span aria-hidden>←</span></Link>
+          <Link href="/contact" className="btn btn-outline">{t("proposal")}</Link>
         </div>
       </div>
-
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent" />
-    </section>
-  );
+      <div className="anim-fade-up mt-14 grid gap-3 sm:mt-16 sm:grid-cols-3 sm:gap-4" style={{animationDelay:"460ms"}}>
+        {pillars.map(([title,body,n])=><div key={title} className="glass group flex items-start gap-4 rounded-2xl border-[#d8af6a]/20 p-5 transition-all duration-500 hover:-translate-y-1 hover:border-[#d8af6a]/60">
+          <span className="font-serif text-3xl text-[#d8af6a]/70">{n}</span><span><strong className="block text-sm font-semibold text-white">{t(title)}</strong><span className="mt-1.5 block text-[13px] leading-relaxed text-white/65">{t(body)}</span></span>
+        </div>)}
+      </div>
+    </div>
+    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d8af6a]/70 to-transparent"/>
+  </section>;
 }
