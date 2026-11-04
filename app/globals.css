@@ -255,3 +255,32 @@ html[lang="ar"] .font-serif { font-family: "Noto Naskh Arabic", "Times New Roman
 @media (prefers-reduced-motion: reduce) {
   .featured-image, .featured-copy { animation:none; }
 }
+
+
+/* Staggered, restrained title reveal over the city image */
+.hero-title-line {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: hero-title-reveal 900ms cubic-bezier(.16,1,.3,1) forwards;
+}
+.hero-title-first { animation-delay: 120ms; }
+.hero-title-second {
+  animation-delay: 340ms;
+  text-shadow: 0 8px 34px rgba(216,175,106,.2);
+}
+.hero-title-rule {
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: hero-rule-reveal 850ms cubic-bezier(.16,1,.3,1) 820ms forwards;
+}
+html[dir="rtl"] .hero-title-rule { transform-origin: right center; }
+@keyframes hero-title-reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-rule-reveal {
+  to { opacity: 1; transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-title-line, .hero-title-rule { opacity: 1; transform: none; animation: none; }
+}
