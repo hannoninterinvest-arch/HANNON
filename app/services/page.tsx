@@ -1,6 +1,7 @@
 import JsonLd from "@/components/JsonLd";
 import PageHeader from "@/components/PageHeader";
 import ServiceCard from "@/components/ServiceCard";
+import LocalizedText from "@/components/LocalizedText";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { getPublishedServices } from "@/lib/server/publicData";
 
@@ -38,7 +39,7 @@ export default async function ServicesPage() {
         <div className="section-pad mx-auto max-w-wrap">
           {services.length === 0 && (
             <p className="rounded-2xl border border-dashed border-gold-500/40 bg-white px-6 py-10 text-center text-sm text-muted-dark">
-              No published services yet.
+              <LocalizedText id="servicesEmpty" />
             </p>
           )}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7">

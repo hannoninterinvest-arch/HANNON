@@ -1,6 +1,7 @@
 import JsonLd from "@/components/JsonLd";
 import PageHeader from "@/components/PageHeader";
 import ProjectCard from "@/components/ProjectCard";
+import LocalizedText from "@/components/LocalizedText";
 import Reveal from "@/components/Reveal";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { getVisibleProjects } from "@/lib/server/publicData";
@@ -39,7 +40,7 @@ export default async function ProjectsPage() {
         <div className="section-pad mx-auto max-w-wrap">
           {projects.length === 0 && (
             <p className="rounded-2xl border border-dashed border-gold-500/40 bg-white px-6 py-10 text-center text-sm text-muted-dark">
-              Investment projects will be published here.
+              <LocalizedText id="projectsEmpty" />
             </p>
           )}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
