@@ -9,6 +9,7 @@ const presets: Record<string, { eyebrow:string; title:string; description:string
   "Services": {eyebrow:"servicesEyebrow",title:"servicesTitle",description:"servicesBody"},
   "Mandates": {eyebrow:"projectsEyebrow",title:"projectsTitle",description:"projectsBody"},
   "Global Reach": {eyebrow:"globalEyebrow",title:"globalTitle",description:"globalBody"},
+  "Contact": {eyebrow:"contactEyebrow",title:"contactPageTitle",description:"contactPageDescription"},
 };
 
 export default function PageHeader({eyebrow,title,description,children,crumbs}:{eyebrow:string;title:ReactNode;description?:string;children?:ReactNode;crumbs?:Crumb[]}) {
