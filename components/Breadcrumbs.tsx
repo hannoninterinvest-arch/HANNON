@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLocale } from "./LocaleProvider";
 
 export type Crumb = { name: string; href: string };
-const keys: Record<string,string> = { Home:"home", About:"about", Services:"services", Projects:"projects", "Global Reach":"reach" };
+const keys: Record<string,string> = { Home:"home", About:"about", Services:"services", Projects:"projects", "Global Reach":"reach", Contact:"contact" };
 
 export default function Breadcrumbs({items,className=""}:{items:Crumb[];className?:string}) {
   const {t,locale}=useLocale();
