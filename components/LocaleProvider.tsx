@@ -15,7 +15,7 @@ const messages: Record<Locale, Messages> = {
     projectsEyebrow:"مشاريع استثمارية", projectsTitle:"فرص مختارة. أثر ملموس.", projectsBody:"اكتشف فرصاً ومشاريع قيد التطوير في تونس والمنطقة والأسواق الدولية.", viewProjects:"عرض جميع المشاريع", publishedProjects:"ستُنشر فرص الاستثمار هنا.",
     globalEyebrow:"حضور دولي", globalTitle:"روابط تمتد عبر القارات", globalBody:"نعمل في تونس وإفريقيا والشرق الأوسط وأوروبا وآسيا، ونتعاون مع المؤسسات المالية والمستثمرين والشركاء الاستراتيجيين.", globalButton:"تواصل مع فريقنا", leadership:"القيادة", managingDirector:"الرئيس التنفيذي", profile:"نبذة عن الرئيس التنفيذي", leaderBody:"يقود رياض ابن شواعة أنشطة حانون في الاستثمار وتطوير المشاريع، ويربط الخبرة المحلية بالشركاء الدوليين في قطاعات استراتيجية.",
     ctaEyebrow:"لنبنِ شراكة مثمرة", ctaTitle:"هل لديكم مشروع استراتيجي؟", ctaBody:"أرسلوا مقترحكم أو استفساركم، وسيتواصل فريقنا معكم عبر البريد الإلكتروني.", discoverServices:"اكتشف خدماتنا",
-    quickLinks:"روابط سريعة", allServices:"جميع الخدمات", footerTagline:"نستثمر في الفرص. ونطوّر أثراً مستداماً.", language:"اللغة",
+    quickLinks:"روابط سريعة", allServices:"جميع الخدمات", footerTagline:"نستثمر في الفرص. ونطوّر أثراً مستداماً.", language:"اللغة", discover:"اكتشف", capitalRaised:"رأس المال المعبأ",
   },
   fr: {
     home:"Accueil", about:"À propos", services:"Services", projects:"Projets", reach:"Présence internationale", contact:"Contact", admin:"Administration",
@@ -26,7 +26,7 @@ const messages: Record<Locale, Messages> = {
     projectsEyebrow:"Projets d’investissement", projectsTitle:"Opportunités sélectionnées. Impact concret.", projectsBody:"Découvrez des opportunités et projets en développement en Tunisie, dans la région et sur les marchés internationaux.", viewProjects:"Voir tous les projets", publishedProjects:"Les opportunités d’investissement seront publiées ici.",
     globalEyebrow:"Présence internationale", globalTitle:"Des connexions sur plusieurs continents", globalBody:"Nous intervenons en Tunisie, en Afrique, au Moyen-Orient, en Europe et en Asie, avec des institutions financières, des investisseurs et des partenaires stratégiques.", globalButton:"Contacter notre équipe", leadership:"Direction", managingDirector:"Président-directeur général", profile:"Profil du dirigeant", leaderBody:"Riadh Ibn Chaouaa dirige les activités d’investissement et de développement de projets de HANNON et relie l’expertise locale aux partenaires internationaux dans des secteurs stratégiques.",
     ctaEyebrow:"Construisons un partenariat", ctaTitle:"Vous portez un projet stratégique ?", ctaBody:"Envoyez-nous votre proposition ou votre question. Notre équipe vous répondra par e-mail.", discoverServices:"Découvrir nos services",
-    quickLinks:"Liens rapides", allServices:"Tous les services", footerTagline:"Investir dans les opportunités. Développer un impact durable.", language:"Langue",
+    quickLinks:"Liens rapides", allServices:"Tous les services", footerTagline:"Investir dans les opportunités. Développer un impact durable.", language:"Langue", discover:"Découvrir", capitalRaised:"Capital mobilisé",
   },
   en: {
     home:"Home", about:"About", services:"Services", projects:"Projects", reach:"Global Reach", contact:"Contact", admin:"Administration",
@@ -37,7 +37,7 @@ const messages: Record<Locale, Messages> = {
     projectsEyebrow:"Investment projects", projectsTitle:"Selected opportunities. Tangible impact.", projectsBody:"Explore opportunities and projects under development in Tunisia, the region and international markets.", viewProjects:"View all projects", publishedProjects:"Investment opportunities will be published here.",
     globalEyebrow:"Global reach", globalTitle:"Connected across continents", globalBody:"We work across Tunisia, Africa, the Middle East, Europe and Asia with financial institutions, investors and strategic partners.", globalButton:"Contact our team", leadership:"Leadership", managingDirector:"Chief Executive Officer", profile:"Leadership profile", leaderBody:"Riadh Ibn Chaouaa leads HANNON’s investment and project development activities, connecting local expertise with international partners across strategic sectors.",
     ctaEyebrow:"Let’s build a partnership", ctaTitle:"Are you developing a strategic project?", ctaBody:"Send us your proposal or question. Our team will reply by email.", discoverServices:"Discover our services",
-    quickLinks:"Quick links", allServices:"All services", footerTagline:"Investing in opportunity. Building lasting impact.", language:"Language",
+    quickLinks:"Quick links", allServices:"All services", footerTagline:"Investing in opportunity. Building lasting impact.", language:"Language", discover:"Discover", capitalRaised:"Capital raised",
   },
 };
 
