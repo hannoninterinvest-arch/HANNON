@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { HannonService } from "@/lib/types";
 import Reveal from "./Reveal";
+import { useLocale } from "./LocaleProvider";
 
 export default function ServiceCard({
   service,
@@ -12,6 +13,7 @@ export default function ServiceCard({
   service: Pick<HannonService, "name" | "slug" | "description" | "imageUrl">;
   index: number;
 }) {
+  const { t } = useLocale();
   const initial = service.name.trim().charAt(0) || "H";
   const number = String(index + 1).padStart(2, "0");
 
@@ -63,7 +65,7 @@ export default function ServiceCard({
             </p>
           ) : null}
           <span className="mt-auto flex items-center gap-2 pt-5 text-[11px] font-semibold uppercase tracking-[2px] text-gold-500">
-            Discover
+            {t("discover")}
             <span
               aria-hidden
               className="inline-block transition-transform duration-300 group-hover:translate-x-1.5"
