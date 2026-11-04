@@ -23,7 +23,7 @@ export default async function Home() {
       <TrustBar />
       <AboutSection />
       <Services services={services} />
-      <ProjectsSection projects={projects} />
+      <ProjectsSection projects={projects} services={services} />
       <GlobalReach />
       <CtaBand />
     </main>
