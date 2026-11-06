@@ -202,11 +202,13 @@ END $$`,
      "status" "projects_status_enum" NOT NULL DEFAULT 'open',
      "visible" boolean NOT NULL DEFAULT true,
      "highlights" text,
+     "videoUrls" jsonb NOT NULL DEFAULT '[]'::jsonb,
      "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
      "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
      CONSTRAINT "PK_projects" PRIMARY KEY ("id"),
      CONSTRAINT "UQ_projects_slug" UNIQUE ("slug")
    )`,
+  `ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "videoUrls" jsonb NOT NULL DEFAULT '[]'::jsonb`,
   `CREATE TABLE IF NOT EXISTS "project_stats" (
      "id" uuid NOT NULL DEFAULT gen_random_uuid(),
      "label" character varying(64) NOT NULL,

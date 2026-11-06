@@ -102,6 +102,10 @@ export default async function ProjectDetailPage({ params }: Params) {
   const progress = progressOf(project.raisedAmount, project.targetAmount);
   const remaining = Math.max(0, Number(project.targetAmount) - Number(project.raisedAmount));
   const presentation = driveLinks(project.presentationUrl);
+  const videos = (project.videoUrls ?? []).flatMap((url) => {
+    const links = driveLinks(url);
+    return links?.previewUrl ? [{ url, ...links }] : [];
+  });
   const interestHref = `/contact?type=interest&project=${project.id}`;
   const risk = project.riskLevel ? RISK[project.riskLevel] : null;
   const tiers = project.ticketTiers || [];
@@ -145,6 +149,7 @@ export default async function ProjectDetailPage({ params }: Params) {
     ["terms", "Deal terms", true],
     ["ticket", "Ticket", true],
     ["presentation", "Presentation", Boolean(presentation)],
+    ["videos", "Project films", videos.length > 0],
     ["analytics", "Analytics", hasAnalytics],
     ["timeline", "Timeline", milestones.length > 0],
     ["risks", "Risks & exit", risks.length > 0 || Boolean(project.exitStrategy) || Boolean(project.securityGuarantees)],
@@ -360,6 +365,44 @@ export default async function ProjectDetailPage({ params }: Params) {
                     This presentation is a Drive folder. Use “Open in Google Drive” to browse it.
                   </p>
                 )}
+              </Section>
+            )}
+
+            {videos.length > 0 && (
+              <Section id="videos" eyebrow="Project films" title="See the opportunity in motion">
+                <div className="overflow-hidden rounded-[28px] border border-gold-500/40 bg-navy-900 shadow-[0_24px_70px_rgba(6,20,57,.18)]">
+                  <div className="border-b border-white/10 px-6 py-5 sm:flex sm:items-end sm:justify-between sm:px-8">
+                    <div>
+                      <div className="text-[10px] font-semibold uppercase tracking-[.24em] text-gold-300">HANNON project showcase</div>
+                      <p className="mt-2 max-w-2xl font-serif text-xl font-semibold text-white sm:text-2xl">A closer look at the project, its scale and its potential.</p>
+                    </div>
+                    <span className="mt-3 inline-flex items-center gap-2 text-xs text-white/60 sm:mt-0"><span className="h-2 w-2 rounded-full bg-gold-300" />{videos.length} {videos.length === 1 ? "film" : "films"}</span>
+                  </div>
+                  <div className="grid gap-px bg-white/10 md:grid-cols-2">
+                    {videos.map((video, index) => (
+                      <div key={video.url} className="bg-navy-900 p-3 sm:p-5">
+                        <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-[#0b204d] shadow-[0_15px_40px_rgba(0,0,0,.3)]">
+                          <iframe
+                            src={video.previewUrl!}
+                            title={`${project.title} — project film ${index + 1}`}
+                            loading="lazy"
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                            className="absolute inset-0 h-full w-full"
+                          />
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between gap-3 px-1 pt-4">
+                          <span className="text-xs font-medium uppercase tracking-[.16em] text-white/60">Film {String(index + 1).padStart(2, "0")}</span>
+                          <a href={video.viewUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gold-300 transition hover:text-white">Open in Drive ↗</a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-col gap-4 border-t border-white/10 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                    <p className="max-w-xl text-sm leading-relaxed text-white/65">Want more information or a tailored discussion? Our team can walk you through this opportunity.</p>
+                    <Link href={interestHref} className="btn btn-gold shrink-0">Discuss this project <span aria-hidden>→</span></Link>
+                  </div>
+                </div>
               </Section>
             )}
 

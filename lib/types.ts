@@ -49,6 +49,7 @@ export type Project = {
   visible: boolean;
   highlights: string[] | null;
   presentationUrl: string | null;
+  videoUrls: string[];
   sortOrder: number;
   featured: boolean;
   riskLevel: RiskLevel | null;

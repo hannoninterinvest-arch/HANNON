@@ -23,6 +23,7 @@ type FormState = {
   durationMonths: string;
   highlights: string;
   presentationUrl: string;
+  videoUrls: string;
   status: ProjectStatus;
   visible: boolean;
   riskLevel: RiskLevel | "";
@@ -54,6 +55,7 @@ function initialState(project?: Project): FormState {
     durationMonths: project ? String(project.durationMonths) : "36",
     highlights: project?.highlights?.join(", ") ?? "",
     presentationUrl: project?.presentationUrl ?? "",
+    videoUrls: (project?.videoUrls ?? []).join("\n"),
     status: project?.status ?? "open",
     visible: project?.visible ?? true,
     riskLevel: project?.riskLevel ?? "",
@@ -226,6 +228,7 @@ export default function ProjectForm({ project }: { project?: Project }) {
           .map((s) => s.trim())
           .filter(Boolean),
         presentationUrl: form.presentationUrl.trim(),
+        videoUrls: form.videoUrls.split("\n").map((url) => url.trim()).filter(Boolean),
         visible: form.visible,
         status: form.status,
         riskLevel: form.riskLevel,
@@ -608,6 +611,23 @@ export default function ProjectForm({ project }: { project?: Project }) {
             In Google Drive, set the file sharing to <strong>Anyone with the link</strong> (Viewer),
             then paste the link here. Visitors can read the PDF on the project page and download it.
             Leave empty to hide the presentation.
+          </p>
+        </Section>
+
+        <Section title="Video showcase (Google Drive)" hint="Add up to 8 Drive video links, one per line. They will appear as embedded players on the public project page.">
+          <label className="field-label">
+            Google Drive video links
+            <textarea
+              rows={4}
+              inputMode="url"
+              placeholder={"https://drive.google.com/file/d/…/view\\nhttps://drive.google.com/file/d/…/view"}
+              value={form.videoUrls}
+              onChange={(e) => set("videoUrls", e.target.value)}
+              className="field-input min-h-28 resize-y"
+            />
+          </label>
+          <p className="text-[12.5px] font-light leading-relaxed text-muted-dark">
+            In Google Drive, set each video to <strong>Anyone with the link</strong> (Viewer), then paste its link here. The project page will show an immersive video player and a direct contact button. Leave empty to hide this section.
           </p>
         </Section>
 

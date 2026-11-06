@@ -10,7 +10,7 @@ type Row = Record<string, unknown>;
 
 const PROJECT_COLUMNS = `id, title, slug, description, summary, sector, location, "imageUrl",
   "cloudinaryPublicId", "targetAmount", "raisedAmount", "minInvestment", "expectedReturn",
-  "durationMonths", status, visible, highlights, "presentationUrl", ${DETAIL_SELECT}, "sortOrder", featured, "createdAt", "updatedAt"`;
+  "durationMonths", status, visible, highlights, "presentationUrl", "videoUrls", ${DETAIL_SELECT}, "sortOrder", featured, "createdAt", "updatedAt"`;
 
 function highlightsOf(value: unknown) {
   if (value == null || value === "") return value == null ? null : [];
@@ -24,6 +24,7 @@ function shapeProject(row: Row, stats: Row[]): Record<string, any> {
   return {
     ...row,
     highlights: highlightsOf(row.highlights),
+    videoUrls: Array.isArray(row.videoUrls) ? row.videoUrls : [],
     stats: stats.map((stat) => ({
       id: stat.id,
       label: stat.label,
@@ -103,6 +104,19 @@ function highlightsText(value: unknown) {
   return items.length ? items.join(",") : null;
 }
 
+function videoLinks(value: unknown) {
+  if (value == null || value === "") return [] as string[];
+  if (!Array.isArray(value)) throw new HttpError(400, "Video links must be a list.");
+  if (value.length > 8) throw new HttpError(400, "You can add up to 8 video links.");
+  return value.map((item) => {
+    const link = String(item ?? "").trim();
+    if (!link) return "";
+    const normalized = normalizeDriveLink(link);
+    if (!normalized) throw new HttpError(400, "Each video must have a Google Drive link.");
+    return normalized;
+  }).filter(Boolean);
+}
+
 function generateStats(raised: number, expectedReturn: number) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
   return months.map((label, i) => {
@@ -173,8 +187,8 @@ export async function createProject(body: Record<string, unknown>) {
     `INSERT INTO projects
       (title, slug, description, summary, sector, location, "imageUrl", "cloudinaryPublicId",
        "targetAmount", "raisedAmount", "minInvestment", "expectedReturn", "durationMonths",
-       status, visible, highlights, "presentationUrl", "sortOrder", featured, ${DETAIL_COLUMNS.map((c) => `"${c}"`).join(", ")})
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19, ${detailPlaceholders(20).join(", ")})
+       status, visible, highlights, "presentationUrl", "videoUrls", "sortOrder", featured, ${DETAIL_COLUMNS.map((c) => `"${c}"`).join(", ")})
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20, ${detailPlaceholders(21).join(", ")})
      RETURNING id`,
     [
       title,
@@ -194,6 +208,7 @@ export async function createProject(body: Record<string, unknown>) {
       visible,
       highlightsText(body.highlights),
       normalizeDriveLink(body.presentationUrl),
+      JSON.stringify(videoLinks(body.videoUrls)),
       Number(first?.next ?? 0),
       featured,
       ...detailParams(details),
@@ -242,6 +257,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
     presentationUrl: has(body, "presentationUrl")
       ? normalizeDriveLink(body.presentationUrl)
       : current.presentationUrl,
+    videoUrls: has(body, "videoUrls") ? videoLinks(body.videoUrls) : (current.videoUrls ?? []),
   };
   const details = readDetails(body, current, Number(next.minInvestment));
   if (has(body, "slug") && next.slug !== current.slug) {
@@ -259,7 +275,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       "imageUrl" = $8, "cloudinaryPublicId" = $9, "targetAmount" = $10, "raisedAmount" = $11,
       "minInvestment" = $12, "expectedReturn" = $13, "durationMonths" = $14, status = $15,
       visible = $16, highlights = CASE WHEN $17 THEN $18 ELSE highlights END,
-      "presentationUrl" = $19, ${detailAssignments(20).join(", ")}, "updatedAt" = now()
+      "presentationUrl" = $19, "videoUrls" = $20::jsonb, ${detailAssignments(21).join(", ")}, "updatedAt" = now()
      WHERE id = $1`,
     [
       id,
@@ -281,6 +297,7 @@ export async function updateProject(id: string, body: Record<string, unknown>) {
       has(body, "highlights"),
       next.highlights,
       next.presentationUrl,
+      JSON.stringify(next.videoUrls),
       ...detailParams(details),
     ],
   );
