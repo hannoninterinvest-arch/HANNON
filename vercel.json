@@ -2,13 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "next build",
-  "installCommand": "npm install",
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.hannoninterinvest.com" }],
-      "destination": "https://hannoninterinvest.com/$1",
-      "permanent": true
-    }
-  ]
+  "installCommand": "npm install"
 }
